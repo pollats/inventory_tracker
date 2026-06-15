@@ -144,10 +144,15 @@
         <span class="label">Borrow / Return</span>
         <span class="desc">Take or return an inventory item</span>
       </button>
-      <button class="tile" data-go="archive" style="grid-column:span 2">
+      <button class="tile" data-go="archive">
         <span class="icon">🗂️</span>
         <span class="label">Returns archive</span>
-        <span class="desc">Full history of returned items with condition photos</span>
+        <span class="desc">History of returned items with photos</span>
+      </button>
+      <button class="tile" data-go="manage-items">
+        <span class="icon">📦</span>
+        <span class="label">Manage items</span>
+        <span class="desc">Add, edit or remove inventory items</span>
       </button>
     </div>
   </div>
@@ -355,6 +360,50 @@
   </div>
 </div>
 
+<!-- MANAGE ITEMS -->
+  <div class="card hidden" id="manage-items-card">
+    <div class="ch">
+      <div class="section-label" style="margin:0;border:none;padding:0">Manage items</div>
+      <button class="back" onclick="goHome()">← Home</button>
+    </div>
+
+    <!-- Item list -->
+    <div id="mi-list" style="margin-bottom:16px"></div>
+
+    <!-- Add / Edit form -->
+    <div id="mi-form-wrap" style="border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px" id="mi-form-title">Add new item</div>
+      <div class="field">
+        <label for="mi-cat">Category <span class="req">*</span></label>
+        <input type="text" id="mi-cat" placeholder="e.g. Audio Visual" list="mi-cat-list" autocomplete="off"/>
+        <datalist id="mi-cat-list"></datalist>
+      </div>
+      <div class="field">
+        <label for="mi-name">Item name <span class="req">*</span></label>
+        <input type="text" id="mi-name" placeholder="e.g. Projector"/>
+      </div>
+      <div class="field">
+        <label for="mi-model">ID / Model number <span class="opt">(optional)</span></label>
+        <input type="text" id="mi-model" placeholder="e.g. PJ-2041"/>
+      </div>
+      <div class="field-row">
+        <div>
+          <label for="mi-total">Total units <span class="req">*</span></label>
+          <input type="text" id="mi-total" placeholder="e.g. 3"/>
+        </div>
+        <div>
+          <label for="mi-avail">Units available <span class="req">*</span></label>
+          <input type="text" id="mi-avail" placeholder="e.g. 3"/>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="mi-save-btn">Add item</button>
+        <button class="btn ghost" id="mi-cancel-btn" onclick="resetMiForm()" style="display:none">Cancel edit</button>
+      </div>
+      <div class="banner" id="mi-banner"></div>
+    </div>
+  </div>
+
 <!-- Token modal -->
 <div class="overlay" id="tok-overlay">
   <div class="dialog">
@@ -391,7 +440,7 @@ const OWNER = 'pollats', REPO = 'inventory_tracker', BRANCH = 'main';
 const TOK_KEY = 'inv_gh_token';
 const RES_HDR = ['Category','Item Name','ID / Model Number','Reserved By','Start Date','End Date','Timestamp'];
 const CHK_HDR = ['Item Name','ID / Model Number','Reservation ID','Taken By','Taken Timestamp','Returned By','On Behalf Of','Return Timestamp','Photo Path','Status'];
-const ARCH_HDR = ['Item Name','ID / Model Number','Category','Reserved By','Reservation Start','Reservation End','Taken Timestamp','Returned By','On Behalf Of','Return Timestamp','Days Held','Photo Path'];
+const ARCH_HDR = ['Item Name','ID / Model Number','Category','Reserved By','Reservation Start','Reservation End','Taken Timestamp','Returned By','On Behalf Of','Return Timestamp','Days Held','Photo'];
 const ITM_HDR = ['Category','Item Name','ID / Model Number','Total Units','Units Available'];
 
 // ── Token ─────────────────────────────────────────────────────────────────
@@ -536,7 +585,7 @@ function calcAvailable(item, startDate, endDate, reservations, checkouts) {
 }
 
 // ── Image compression + base64 ────────────────────────────────────────────
-function compressImage(file, maxW = 1200, quality = 0.75) {
+function compressImage(file, maxW = 600, quality = 0.45) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = e => {
@@ -566,7 +615,7 @@ function compressImage(file, maxW = 1200, quality = 0.75) {
 const cards = {
   'home':'home-card','res-menu':'res-menu-card','borrow-menu':'borrow-menu-card',
   'add-res':'add-res-card','view-res':'view-res-card','mod-res':'mod-res-card','del-res':'del-res-card',
-  'take':'take-card','return':'return-card','archive':'archive-card'
+  'take':'take-card','return':'return-card','archive':'archive-card','manage-items':'manage-items-card'
 };
 
 function showOnly(key) {
@@ -584,6 +633,7 @@ function goSection(key) {
   if (key === 'take')     openTake();
   if (key === 'return')   openReturn();
   if (key === 'archive')  openArchive();
+  if (key === 'manage-items') openManageItems();
 }
 
 document.querySelectorAll('[data-go]').forEach(el => {
@@ -913,13 +963,8 @@ $('ret-btn').addEventListener('click', ()=>{
       const c=freshChk[idx];
       if(!c||c['Status']!=='taken'){showBanner('ret-banner','error','Not found','This checkout record is no longer active.');setLoading('ret-btn',false,'Confirm return');return;}
 
-      // Step 1: upload photo first (if any) — this is its own file, no SHA conflict
-      let photoPath='';
-      if(photoB64){
-        const ts=Date.now(); const safeName=c['Item Name'].replace(/[^a-z0-9]/gi,'-').toLowerCase();
-        photoPath=`photos/${ts}-${safeName}.txt`;
-        await writeFile(photoPath, photoB64, tok);
-      }
+      // Photo stored inline in archive CSV — no separate file upload needed
+      const photoData = photoB64 || '';
 
       // Step 2: re-read checkouts fresh (photo upload may have taken time), write updated record
       const freshChk2 = await readCSV('checkouts.csv');
@@ -956,7 +1001,7 @@ $('ret-btn').addEventListener('click', ()=>{
         'On Behalf Of': behalf || '',
         'Return Timestamp': freshChk2[idx]['Return Timestamp'],
         'Days Held': daysHeld.toString(),
-        'Photo Path': photoPath || ''
+        'Photo': photoData
       };
       // Step 5: append to archive.csv
       const freshArchive = await readCSV('archive.csv');
@@ -968,7 +1013,7 @@ $('ret-btn').addEventListener('click', ()=>{
         await writeCSV('reservations.csv', RES_HDR, updRes, tok);
       }
 
-      showConfirm('returned', 'Item returned', `<strong>${c['Item Name']}</strong> has been returned by <strong>${retBy}</strong>.${behalf?`<br>On behalf of <strong>${behalf}</strong>.`:''}${photoPath?`<br><span style="color:var(--success);font-size:13px">📷 Photo saved.</span>`:''}`, async () => { await openReturn(); showOnly('return'); });
+      showConfirm('returned', 'Item returned', `<strong>${c['Item Name']}</strong> has been returned by <strong>${retBy}</strong>.${behalf?`<br>On behalf of <strong>${behalf}</strong>.`:''}${photoData?`<br><span style="color:var(--success);font-size:13px">📷 Photo saved.</span>`:''}`, async () => { await openReturn(); showOnly('return'); });
     } catch(err){showBanner('ret-banner','error','Error',err.message||'Could not save.');}
     setLoading('ret-btn',false,'Confirm return');
   });
@@ -980,6 +1025,144 @@ $('ret-btn').addEventListener('click', ()=>{
 // ── Helpers ───────────────────────────────────────────────────────────────
 function show(id){$(id).classList.remove('hidden');}
 function hide(id){$(id).classList.add('hidden');}
+
+
+// ── MANAGE ITEMS ──────────────────────────────────────────────────────────
+let miEditIdx = null; // null = adding, number = editing index
+
+async function openManageItems() {
+  show('manage-items-card');
+  resetMiForm();
+  await refreshMiList();
+}
+
+async function refreshMiList() {
+  $('mi-list').innerHTML = '<div class="skel" style="height:60px;margin-bottom:8px"></div>';
+  try {
+    const items = await readCSV('items.csv');
+    // Populate category datalist for autocomplete
+    const cats = [...new Set(items.map(i => i['Category']))].sort();
+    $('mi-cat-list').innerHTML = cats.map(c => `<option value="${c}">`).join('');
+    renderMiList(items);
+  } catch {
+    $('mi-list').innerHTML = '<div class="empty">Could not load items.</div>';
+  }
+}
+
+function renderMiList(items) {
+  if (!items.length) { $('mi-list').innerHTML = '<div class="empty" style="margin-bottom:12px">No items yet. Add one below.</div>'; return; }
+  const grouped = {};
+  items.forEach((item, idx) => {
+    const cat = item['Category'] || 'Uncategorised';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push({ item, idx });
+  });
+  let html = '';
+  Object.keys(grouped).sort().forEach(cat => {
+    html += `<div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px">${cat}</div>`;
+    grouped[cat].forEach(({ item, idx }) => {
+      const ua = parseInt(item['Units Available']) || 0;
+      const tot = parseInt(item['Total Units']) || 0;
+      html += `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);margin-bottom:6px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;color:var(--text)">${item['Item Name']}${item['ID / Model Number']?` <span style="color:var(--muted);font-size:11px">(${item['ID / Model Number']})</span>`:''}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${ua} of ${tot} available</div>
+        </div>
+        <button onclick="startEditItem(${idx})" style="background:none;border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:12px;color:var(--accent);cursor:pointer;font-family:inherit;white-space:nowrap">Edit</button>
+        <button onclick="deleteItem(${idx})" style="background:none;border:1px solid #FECACA;border-radius:5px;padding:5px 10px;font-size:12px;color:var(--error);cursor:pointer;font-family:inherit;white-space:nowrap">Remove</button>
+      </div>`;
+    });
+  });
+  $('mi-list').innerHTML = html;
+}
+
+async function startEditItem(idx) {
+  const items = await readCSV('items.csv');
+  const item = items[idx];
+  if (!item) return;
+  miEditIdx = idx;
+  $('mi-cat').value = item['Category'] || '';
+  $('mi-name').value = item['Item Name'] || '';
+  $('mi-model').value = item['ID / Model Number'] || '';
+  $('mi-total').value = item['Total Units'] || '';
+  $('mi-avail').value = item['Units Available'] || '';
+  $('mi-form-title').textContent = `Editing: ${item['Item Name']}`;
+  $('mi-save-btn').textContent = 'Save changes';
+  $('mi-cancel-btn').style.display = '';
+  $('mi-form-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  hideBanner('mi-banner');
+}
+
+function resetMiForm() {
+  miEditIdx = null;
+  $('mi-cat').value = ''; $('mi-name').value = ''; $('mi-model').value = '';
+  $('mi-total').value = ''; $('mi-avail').value = '';
+  $('mi-form-title').textContent = 'Add new item';
+  $('mi-save-btn').textContent = 'Add item';
+  $('mi-cancel-btn').style.display = 'none';
+  hideBanner('mi-banner');
+}
+
+async function deleteItem(idx) {
+  const items = await readCSV('items.csv');
+  const item = items[idx];
+  if (!item) return;
+  if (!confirm(`Remove "${item['Item Name']}" from inventory? This cannot be undone.`)) return;
+  items.splice(idx, 1);
+  $('mi-list').innerHTML = '<div class="skel" style="height:60px"></div>';
+  try {
+    await writeCSV('items.csv', ITM_HDR, items, getActive());
+    allItems = await readCSV('items.csv'); // refresh global
+    showBanner('mi-banner', 'success', 'Removed', `"${item['Item Name']}" has been removed.`);
+    await refreshMiList();
+  } catch(err) {
+    showBanner('mi-banner', 'error', 'Error', err.message || 'Could not remove item.');
+    await refreshMiList();
+  }
+}
+
+$('mi-save-btn').addEventListener('click', async () => {
+  const cat   = $('mi-cat').value.trim();
+  const name  = $('mi-name').value.trim();
+  const model = $('mi-model').value.trim();
+  const total = parseInt($('mi-total').value.trim());
+  const avail = parseInt($('mi-avail').value.trim());
+
+  if (!cat || !name) { showBanner('mi-banner', 'error', 'Required', 'Category and item name are required.'); return; }
+  if (isNaN(total) || total < 1) { showBanner('mi-banner', 'error', 'Invalid', 'Total units must be at least 1.'); return; }
+  if (isNaN(avail) || avail < 0) { showBanner('mi-banner', 'error', 'Invalid', 'Units available cannot be negative.'); return; }
+  if (avail > total) { showBanner('mi-banner', 'error', 'Invalid', 'Units available cannot exceed total units.'); return; }
+
+  setLoading('mi-save-btn', true, miEditIdx === null ? 'Add item' : 'Save changes');
+  hideBanner('mi-banner');
+
+  try {
+    const items = await readCSV('items.csv');
+    const newItem = { 'Category': cat, 'Item Name': name, 'ID / Model Number': model, 'Total Units': total.toString(), 'Units Available': avail.toString() };
+
+    if (miEditIdx !== null) {
+      items[miEditIdx] = newItem;
+    } else {
+      // Check for duplicate name
+      if (items.find(i => i['Item Name'].toLowerCase() === name.toLowerCase())) {
+        showBanner('mi-banner', 'error', 'Duplicate', `An item named "${name}" already exists.`);
+        setLoading('mi-save-btn', false, 'Add item'); return;
+      }
+      items.push(newItem);
+    }
+
+    await writeCSV('items.csv', ITM_HDR, items, getActive());
+    allItems = await readCSV('items.csv'); // refresh global
+    const action = miEditIdx !== null ? 'updated' : 'added';
+    showBanner('mi-banner', 'success', miEditIdx !== null ? 'Updated' : 'Added', `"${name}" has been ${action}.`);
+    resetMiForm();
+    await refreshMiList();
+  } catch(err) {
+    showBanner('mi-banner', 'error', 'Error', err.message || 'Could not save.');
+  }
+  setLoading('mi-save-btn', false, miEditIdx === null ? 'Add item' : 'Save changes');
+});
 
 // ── ARCHIVE ───────────────────────────────────────────────────────────────
 let archiveData = [];
@@ -1005,7 +1188,7 @@ function renderArchive(rows) {
   const sorted = [...rows].sort((a, b) => b['Return Timestamp'].localeCompare(a['Return Timestamp']));
   let html = '<div style="display:flex;flex-direction:column;gap:12px">';
   sorted.forEach((r, i) => {
-    const hasPhoto = r['Photo Path'] && r['Photo Path'].trim() !== '';
+    const hasPhoto = r['Photo'] && r['Photo'].trim() !== '';
     const days = r['Days Held'] ? `${r['Days Held']} day${r['Days Held']==='1'?'':'s'}` : '—';
     const retDate = r['Return Timestamp'] ? fmt(r['Return Timestamp'].split('T')[0]) : '—';
     const takenDate = r['Taken Timestamp'] ? fmt(r['Taken Timestamp'].split('T')[0]) : '—';
@@ -1026,7 +1209,7 @@ function renderArchive(rows) {
         <div><span style="font-weight:500;color:var(--text)">Reserved for</span><br>${fmt(r['Reservation Start'])} – ${fmt(r['Reservation End'])}</div>
         <div><span style="font-weight:500;color:var(--text)">Days held</span><br>${days}</div>
       </div>
-      ${hasPhoto ? `<button onclick="viewPhoto('${r['Photo Path']}','${r['Item Name']}','${r['Returned By']}','${retDate}')" style="margin-top:4px;background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--accent);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:background .15s" onmouseover="this.style.background='#F0F5FF'" onmouseout="this.style.background='none'">📷 View condition photo</button>` : `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">No photo taken</div>`}
+      ${hasPhoto ? `<button onclick="viewPhotoInline('${i}','${r['Item Name']}','${r['Returned By']}','${retDate}')" style="margin-top:4px;background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--accent);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:background .15s" onmouseover="this.style.background='#F0F5FF'" onmouseout="this.style.background='none'">📷 View condition photo</button>` : `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">No photo taken</div>`}
     </div>`;
   });
   html += '</div>';
@@ -1047,19 +1230,20 @@ $('arch-search').addEventListener('input', function() {
   renderArchive(filtered);
 });
 
-async function viewPhoto(path, itemName, returnedBy, retDate) {
+function viewPhotoInline(rowIdx, itemName, returnedBy, retDate) {
+  const sorted = [...archiveData].sort((a, b) => b['Return Timestamp'].localeCompare(a['Return Timestamp']));
+  const row = sorted[parseInt(rowIdx)];
+  const b64 = row ? row['Photo'] : '';
   $('pv-title').textContent = itemName;
   $('pv-sub').textContent = `Returned by ${returnedBy} on ${retDate}`;
-  $('pv-img').src = '';
-  $('pv-meta').textContent = 'Loading photo…';
   $('photo-viewer-overlay').classList.add('show');
-  try {
-    const b64 = await readFile(path);
+  if (b64) {
     $('pv-img').src = `data:image/jpeg;base64,${b64}`;
     const kb = Math.round(b64.length * 0.75 / 1024);
-    $('pv-meta').textContent = `Approx. ${kb} KB · Stored as base64 text`;
-  } catch {
-    $('pv-meta').textContent = 'Could not load photo.';
+    $('pv-meta').textContent = `Approx. ${kb} KB · Compressed and stored inline`;
+  } else {
+    $('pv-img').src = '';
+    $('pv-meta').textContent = 'No photo available.';
   }
 }
 
