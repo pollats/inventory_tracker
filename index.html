@@ -144,6 +144,11 @@
         <span class="label">Borrow / Return</span>
         <span class="desc">Take or return an inventory item</span>
       </button>
+      <button class="tile" data-go="archive" style="grid-column:span 2">
+        <span class="icon">🗂️</span>
+        <span class="label">Returns archive</span>
+        <span class="desc">Full history of returned items with condition photos</span>
+      </button>
     </div>
   </div>
 
@@ -323,6 +328,33 @@
   </div>
 </div>
 
+<!-- ARCHIVE -->
+  <div class="card hidden" id="archive-card">
+    <div class="ch">
+      <div class="section-label" style="margin:0;border:none;padding:0">Returns archive</div>
+      <button class="back" onclick="goHome()">← Home</button>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <input type="text" id="arch-search" placeholder="Search by item, person, date…" style="font-size:13px"/>
+    </div>
+    <div id="archive-body"><div class="skel" style="height:80px"></div></div>
+  </div>
+
+<!-- Photo viewer modal -->
+<div class="overlay" id="photo-viewer-overlay">
+  <div class="dialog" style="max-width:520px;padding:20px">
+    <div class="ch" style="margin-bottom:12px">
+      <div>
+        <div style="font-size:15px;font-weight:600" id="pv-title"></div>
+        <div style="font-size:12px;color:var(--muted)" id="pv-sub"></div>
+      </div>
+      <button class="back" onclick="closePhotoViewer()">✕ Close</button>
+    </div>
+    <img id="pv-img" src="" alt="Condition photo" style="max-width:100%;border-radius:8px;display:block"/>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px" id="pv-meta"></div>
+  </div>
+</div>
+
 <!-- Token modal -->
 <div class="overlay" id="tok-overlay">
   <div class="dialog">
@@ -351,13 +383,7 @@
   </div>
 </div>
 
-<!-- Photo viewer modal -->
-<div class="overlay" id="photo-modal">
-  <div class="dialog" id="photo-modal-inner" style="max-width:500px">
-    <div class="ch"><h3>Return photo</h3><button class="back" onclick="closePhotoModal()">✕ Close</button></div>
-    <img id="photo-modal-img" src="" alt="Return photo" style="max-width:100%;border-radius:8px"/>
-  </div>
-</div>
+
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────
@@ -540,7 +566,7 @@ function compressImage(file, maxW = 1200, quality = 0.75) {
 const cards = {
   'home':'home-card','res-menu':'res-menu-card','borrow-menu':'borrow-menu-card',
   'add-res':'add-res-card','view-res':'view-res-card','mod-res':'mod-res-card','del-res':'del-res-card',
-  'take':'take-card','return':'return-card'
+  'take':'take-card','return':'return-card','archive':'archive-card'
 };
 
 function showOnly(key) {
@@ -557,6 +583,7 @@ function goSection(key) {
   if (key === 'del-res')  openDelRes();
   if (key === 'take')     openTake();
   if (key === 'return')   openReturn();
+  if (key === 'archive')  openArchive();
 }
 
 document.querySelectorAll('[data-go]').forEach(el => {
@@ -948,18 +975,98 @@ $('ret-btn').addEventListener('click', ()=>{
 });
 
 // ── Photo viewer ──────────────────────────────────────────────────────────
-async function viewPhoto(path){
-  try {
-    const b64=await readFile(path);
-    $('photo-modal-img').src=`data:image/jpeg;base64,${b64}`;
-    $('photo-modal').classList.add('show');
-  } catch { alert('Could not load photo.'); }
-}
-function closePhotoModal(){$('photo-modal').classList.remove('show');}
+
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 function show(id){$(id).classList.remove('hidden');}
 function hide(id){$(id).classList.add('hidden');}
+
+// ── ARCHIVE ───────────────────────────────────────────────────────────────
+let archiveData = [];
+
+async function openArchive() {
+  show('archive-card');
+  $('arch-search').value = '';
+  $('archive-body').innerHTML = '<div class="skel" style="height:100px"></div>';
+  try {
+    archiveData = await readCSV('archive.csv');
+    renderArchive(archiveData);
+  } catch {
+    $('archive-body').innerHTML = '<div class="empty">Could not load archive.</div>';
+  }
+}
+
+function renderArchive(rows) {
+  if (!rows.length) {
+    $('archive-body').innerHTML = '<div class="empty">No returns recorded yet.</div>';
+    return;
+  }
+  // Sort newest first by Return Timestamp
+  const sorted = [...rows].sort((a, b) => b['Return Timestamp'].localeCompare(a['Return Timestamp']));
+  let html = '<div style="display:flex;flex-direction:column;gap:12px">';
+  sorted.forEach((r, i) => {
+    const hasPhoto = r['Photo Path'] && r['Photo Path'].trim() !== '';
+    const days = r['Days Held'] ? `${r['Days Held']} day${r['Days Held']==='1'?'':'s'}` : '—';
+    const retDate = r['Return Timestamp'] ? fmt(r['Return Timestamp'].split('T')[0]) : '—';
+    const takenDate = r['Taken Timestamp'] ? fmt(r['Taken Timestamp'].split('T')[0]) : '—';
+    html += `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">${r['Item Name']}${r['ID / Model Number']?` <span style="font-size:12px;color:var(--muted);font-weight:400">(${r['ID / Model Number']})</span>`:''}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${r['Category']||''}</div>
+        </div>
+        <span class="badge returned" style="flex-shrink:0">Returned</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;color:var(--muted);margin-bottom:${hasPhoto?'12px':'0'}">
+        <div><span style="font-weight:500;color:var(--text)">Borrowed by</span><br>${r['Reserved By']||'—'}</div>
+        <div><span style="font-weight:500;color:var(--text)">Returned by</span><br>${r['Returned By']||'—'}${r['On Behalf Of']?`<br><span style="font-size:11px">on behalf of ${r['On Behalf Of']}</span>`:''}</div>
+        <div><span style="font-weight:500;color:var(--text)">Taken</span><br>${takenDate}</div>
+        <div><span style="font-weight:500;color:var(--text)">Returned</span><br>${retDate}</div>
+        <div><span style="font-weight:500;color:var(--text)">Reserved for</span><br>${fmt(r['Reservation Start'])} – ${fmt(r['Reservation End'])}</div>
+        <div><span style="font-weight:500;color:var(--text)">Days held</span><br>${days}</div>
+      </div>
+      ${hasPhoto ? `<button onclick="viewPhoto('${r['Photo Path']}','${r['Item Name']}','${r['Returned By']}','${retDate}')" style="margin-top:4px;background:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--accent);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:background .15s" onmouseover="this.style.background='#F0F5FF'" onmouseout="this.style.background='none'">📷 View condition photo</button>` : `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">No photo taken</div>`}
+    </div>`;
+  });
+  html += '</div>';
+  $('archive-body').innerHTML = html;
+}
+
+// Search filter
+$('arch-search').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  if (!q) { renderArchive(archiveData); return; }
+  const filtered = archiveData.filter(r =>
+    (r['Item Name']||'').toLowerCase().includes(q) ||
+    (r['Reserved By']||'').toLowerCase().includes(q) ||
+    (r['Returned By']||'').toLowerCase().includes(q) ||
+    (r['Category']||'').toLowerCase().includes(q) ||
+    (r['Return Timestamp']||'').includes(q)
+  );
+  renderArchive(filtered);
+});
+
+async function viewPhoto(path, itemName, returnedBy, retDate) {
+  $('pv-title').textContent = itemName;
+  $('pv-sub').textContent = `Returned by ${returnedBy} on ${retDate}`;
+  $('pv-img').src = '';
+  $('pv-meta').textContent = 'Loading photo…';
+  $('photo-viewer-overlay').classList.add('show');
+  try {
+    const b64 = await readFile(path);
+    $('pv-img').src = `data:image/jpeg;base64,${b64}`;
+    const kb = Math.round(b64.length * 0.75 / 1024);
+    $('pv-meta').textContent = `Approx. ${kb} KB · Stored as base64 text`;
+  } catch {
+    $('pv-meta').textContent = 'Could not load photo.';
+  }
+}
+
+function closePhotoViewer() {
+  $('photo-viewer-overlay').classList.remove('show');
+  $('pv-img').src = '';
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────
 async function init(){
