@@ -365,6 +365,7 @@ const OWNER = 'pollats', REPO = 'inventory_tracker', BRANCH = 'main';
 const TOK_KEY = 'inv_gh_token';
 const RES_HDR = ['Category','Item Name','ID / Model Number','Reserved By','Start Date','End Date','Timestamp'];
 const CHK_HDR = ['Item Name','ID / Model Number','Reservation ID','Taken By','Taken Timestamp','Returned By','On Behalf Of','Return Timestamp','Photo Path','Status'];
+const ARCH_HDR = ['Item Name','ID / Model Number','Category','Reserved By','Reservation Start','Reservation End','Taken Timestamp','Returned By','On Behalf Of','Return Timestamp','Days Held','Photo Path'];
 const ITM_HDR = ['Category','Item Name','ID / Model Number','Total Units','Units Available'];
 
 // ── Token ─────────────────────────────────────────────────────────────────
@@ -898,8 +899,31 @@ $('ret-btn').addEventListener('click', ()=>{
         } return i;
       });
       await writeCSV('items.csv', ITM_HDR, updItems, tok);
-      // Step 4: remove the linked reservation from reservations.csv
+      // Step 4: build archive record from checkout + reservation data
       const freshRes = await readCSV('reservations.csv');
+      const matchedRes = freshRes.find(r => r['Timestamp'] === freshChk2[idx]['Reservation ID']) || {};
+      // Calculate days held: from taken timestamp to return timestamp
+      const takenDate = new Date(freshChk2[idx]['Taken Timestamp']);
+      const returnDate = new Date();
+      const daysHeld = Math.max(1, Math.round((returnDate - takenDate) / (1000 * 60 * 60 * 24)));
+      const archiveRow = {
+        'Item Name': c['Item Name'],
+        'ID / Model Number': c['ID / Model Number'] || '',
+        'Category': matchedRes['Category'] || '',
+        'Reserved By': c['Taken By'],
+        'Reservation Start': matchedRes['Start Date'] || '',
+        'Reservation End': matchedRes['End Date'] || '',
+        'Taken Timestamp': c['Taken Timestamp'],
+        'Returned By': retBy,
+        'On Behalf Of': behalf || '',
+        'Return Timestamp': freshChk2[idx]['Return Timestamp'],
+        'Days Held': daysHeld.toString(),
+        'Photo Path': photoPath || ''
+      };
+      // Step 5: append to archive.csv
+      const freshArchive = await readCSV('archive.csv');
+      await writeCSV('archive.csv', ARCH_HDR, [...freshArchive, archiveRow], tok);
+      // Step 6: remove linked reservation from reservations.csv
       const updRes = freshRes.filter(r => r['Timestamp'] !== freshChk2[idx]['Reservation ID']);
       if(updRes.length !== freshRes.length) {
         await writeCSV('reservations.csv', RES_HDR, updRes, tok);
