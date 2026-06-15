@@ -99,6 +99,14 @@
     .tok-status.saved{color:var(--success)}
     /* photo viewer modal */
     #photo-modal img{max-width:100%;border-radius:8px;margin-top:12px}
+    /* confirmation modal */
+    #confirm-modal .dialog{text-align:center;padding:36px 28px}
+    .confirm-icon{font-size:48px;margin-bottom:16px;display:block;animation:popIn .35s cubic-bezier(.175,.885,.32,1.275)}
+    @keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+    #confirm-modal h3{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+    #confirm-modal .confirm-body{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:24px}
+    #confirm-modal .confirm-body strong{color:var(--text)}
+    #confirm-modal .btn{max-width:200px;margin:0 auto}
     .hidden{display:none!important}
     @media(max-width:420px){
       .card{padding:20px 16px}
@@ -333,6 +341,16 @@
   </div>
 </div>
 
+<!-- Confirmation modal -->
+<div class="overlay" id="confirm-modal">
+  <div class="dialog">
+    <span class="confirm-icon" id="confirm-icon">✅</span>
+    <h3 id="confirm-title"></h3>
+    <div class="confirm-body" id="confirm-body"></div>
+    <button class="btn" id="confirm-close-btn" onclick="closeConfirm()">Done</button>
+  </div>
+</div>
+
 <!-- Photo viewer modal -->
 <div class="overlay" id="photo-modal">
   <div class="dialog" id="photo-modal-inner" style="max-width:500px">
@@ -540,6 +558,22 @@ document.querySelectorAll('[data-go]').forEach(el => {
 const $ = id => document.getElementById(id);
 function showBanner(id, type, title, body) { const el=$(id); el.className=`banner show ${type}`; el.innerHTML=`<strong>${title}</strong>${body}`; }
 function hideBanner(id) { const el=$(id); el.className='banner'; el.innerHTML=''; }
+
+// Confirmation modal — used for all success states
+const CONFIRM_ICONS = { reservation:'🗓️', taken:'📦', returned:'↩️', deleted:'🗑️', modified:'✏️', generic:'✅' };
+function showConfirm(type, title, bodyHTML, onDone) {
+  $('confirm-icon').textContent = CONFIRM_ICONS[type] || CONFIRM_ICONS.generic;
+  $('confirm-title').textContent = title;
+  $('confirm-body').innerHTML = bodyHTML;
+  $('confirm-modal').classList.add('show');
+  $('confirm-modal')._onDone = onDone || null;
+}
+function closeConfirm() {
+  const cb = $('confirm-modal')._onDone;
+  $('confirm-modal').classList.remove('show');
+  $('confirm-modal')._onDone = null;
+  if (cb) cb();
+}
 function setLoading(id, yes, label) { const b=$(id); b.disabled=yes; b.innerHTML=yes?'<div class="spinner"></div> Working…':label; }
 function setAvail(text, cls) { const el=$('avail-strip'); el.textContent=text; el.className=cls||''; }
 
@@ -630,8 +664,7 @@ $('res-form').addEventListener('submit', e => {
       const rowToSave={...newRow}; delete rowToSave['_id'];
       rowToSave['Timestamp']=id; // reuse Timestamp as unique ID (ISO timestamp is unique enough)
       await writeCSV('reservations.csv', RES_HDR, [...freshRes.map(r=>({...r})), rowToSave], tok);
-      showBanner('r-banner','success','Reserved',`${iName} booked for <strong>${name}</strong> from ${fmt(sDate)} to ${fmt(eDate)}.`);
-      resetResForm(); populateCats();
+      showConfirm('reservation', 'Reservation confirmed', `<strong>${iName}</strong> has been booked for <strong>${name}</strong><br>from ${fmt(sDate)} to ${fmt(eDate)}.`, () => { resetResForm(); populateCats(); });
     } catch(err) { showBanner('r-banner','error','Error',err.message||'Could not save.'); }
     setLoading('r-submit',false,'Reserve item');
   });
@@ -703,8 +736,7 @@ $('mod-btn').addEventListener('click', ()=>{
       if(avail<=0){showBanner('mod-banner','error','Conflict',`No units available for these new dates.`);setLoading('mod-btn',false,'Save changes');return;}
       freshRes[idx]={...r,'Reserved By':nn,'Start Date':ns,'End Date':ne,'Timestamp':r['Timestamp']};
       await writeCSV('reservations.csv',RES_HDR,freshRes,tok);
-      showBanner('mod-banner','success','Updated',`Updated for <strong>${nn}</strong> from ${fmt(ns)} to ${fmt(ne)}.`);
-      $('mod-fields').classList.add('hidden'); $('mod-sel').value='';
+      showConfirm('modified', 'Reservation updated', `<strong>${r['Item Name']}</strong> is now booked for <strong>${nn}</strong><br>from ${fmt(ns)} to ${fmt(ne)}.`, () => { $('mod-fields').classList.add('hidden'); $('mod-sel').value=''; });
     } catch(err){showBanner('mod-banner','error','Error',err.message||'Could not save.');}
     setLoading('mod-btn',false,'Save changes');
   });
@@ -735,9 +767,7 @@ $('del-confirm').addEventListener('click', ()=>{
     try {
       const freshRes=await readCSV('reservations.csv'); freshRes.splice(idx,1);
       await writeCSV('reservations.csv',RES_HDR,freshRes,tok);
-      showBanner('del-banner','success','Deleted','Reservation removed.');
-      $('del-preview').classList.add('hidden'); $('del-sel').value='';
-      await openDelRes(); showOnly('del-res');
+      showConfirm('deleted', 'Reservation deleted', 'The reservation has been permanently removed.', async () => { await openDelRes(); showOnly('del-res'); });
     } catch(err){showBanner('del-banner','error','Error',err.message||'Could not delete.');}
     setLoading('del-confirm',false,'Yes, delete it');
   });
@@ -788,9 +818,7 @@ $('take-btn').addEventListener('click', ()=>{
         writeCSV('checkouts.csv', CHK_HDR, [...freshChk, newChk], tok),
         writeCSV('items.csv', ITM_HDR, updItems, tok)
       ]);
-      showBanner('take-banner','success','Taken',`${r['Item Name']} marked as taken by <strong>${r['Reserved By']}</strong>.`);
-      $('take-detail').classList.add('hidden'); $('take-sel').value='';
-      await openTake(); showOnly('take');
+      showConfirm('taken', 'Item taken', `<strong>${r['Item Name']}</strong> has been checked out to <strong>${r['Reserved By']}</strong>.<br>Due back by ${fmt(r['End Date'])}.`, async () => { await openTake(); showOnly('take'); });
     } catch(err){showBanner('take-banner','error','Error',err.message||'Could not save.');}
     setLoading('take-btn',false,'Confirm — I\'m taking this item');
   });
@@ -873,9 +901,7 @@ $('ret-btn').addEventListener('click', ()=>{
         writeCSV('items.csv', ITM_HDR, updItems, tok)
       ]);
 
-      showBanner('ret-banner','success','Returned',`${c['Item Name']} returned by <strong>${retBy}</strong>.${behalf?` On behalf of <strong>${behalf}</strong>.`:''}`);
-      $('ret-fields').classList.add('hidden'); $('ret-sel').value=''; photoB64=null;
-      await openReturn(); showOnly('return');
+      showConfirm('returned', 'Item returned', `<strong>${c['Item Name']}</strong> has been returned by <strong>${retBy}</strong>.${behalf?`<br>On behalf of <strong>${behalf}</strong>.`:''}${photoPath?`<br><span style="color:var(--success);font-size:13px">📷 Photo saved.</span>`:''}`, async () => { await openReturn(); showOnly('return'); });
     } catch(err){showBanner('ret-banner','error','Error',err.message||'Could not save.');}
     setLoading('ret-btn',false,'Confirm return');
   });
