@@ -1,3 +1,4 @@
 Item Name,ID / Model Number,Reservation ID,Taken By,Taken Timestamp,Returned By,On Behalf Of,Return Timestamp,Photo Path,Status
 Projector,PJ-2041,R1781560386453,Testing 3,2026-06-15T22:02:31.803Z,Pollo,Testing 3,2026-06-15T22:08:48.210Z,photos/1781561326403-projector.txt,returned
 Standing Desk,976976,2026-06-15T21:04:15.562Z,Anth,2026-06-15T22:22:50.570Z,Pollo,Anth,2026-06-15T22:23:10.272Z,photos/1781562188237-standing-desk.txt,returned
+Standing Desk,PJ-2041,R1781562624753,Arnold,2026-06-15T22:30:56.437Z,,,,,taken
