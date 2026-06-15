@@ -798,22 +798,22 @@ $('take-btn').addEventListener('click', ()=>{
   requireToken(async tok=>{
     setLoading('take-btn',true,'Confirm — I\'m taking this item'); hideBanner('take-banner');
     try {
-      const [freshRes, freshChk, freshItems] = await Promise.all([readCSV('reservations.csv'), readCSV('checkouts.csv'), readCSV('items.csv')]);
+      // Step 1: read reservations + checkouts to validate
+      const [freshRes, freshChk] = await Promise.all([readCSV('reservations.csv'), readCSV('checkouts.csv')]);
       const r=freshRes.find(x=>x['Timestamp']===takeResID);
       if(!r){showBanner('take-banner','error','Not found','Reservation not found.');setLoading('take-btn',false,'Confirm — I\'m taking this item');return;}
-      // Add checkout record
+      // Step 2: write checkout record
       const newChk={'Item Name':r['Item Name'],'ID / Model Number':r['ID / Model Number'],'Reservation ID':takeResID,'Taken By':r['Reserved By'],'Taken Timestamp':tsNow(),'Returned By':'','On Behalf Of':'','Return Timestamp':'','Photo Path':'','Status':'taken'};
-      // Decrement Units Available
-      const updItems=freshItems.map(i=>{
+      await writeCSV('checkouts.csv', CHK_HDR, [...freshChk, newChk], tok);
+      // Step 3: re-read items fresh, decrement, write
+      const freshItems = await readCSV('items.csv');
+      const updItems = freshItems.map(i=>{
         if(i['Item Name']===r['Item Name']){
           const ua=Math.max(0,(parseInt(i['Units Available'])||0)-1);
           return {...i,'Units Available':ua.toString()};
         } return i;
       });
-      await Promise.all([
-        writeCSV('checkouts.csv', CHK_HDR, [...freshChk, newChk], tok),
-        writeCSV('items.csv', ITM_HDR, updItems, tok)
-      ]);
+      await writeCSV('items.csv', ITM_HDR, updItems, tok);
       showConfirm('taken', 'Item taken', `<strong>${r['Item Name']}</strong> has been checked out to <strong>${r['Reserved By']}</strong>.<br>Due back by ${fmt(r['End Date'])}.`, async () => { await openTake(); showOnly('take'); });
     } catch(err){showBanner('take-banner','error','Error',err.message||'Could not save.');}
     setLoading('take-btn',false,'Confirm — I\'m taking this item');
@@ -870,10 +870,12 @@ $('ret-btn').addEventListener('click', ()=>{
   requireToken(async tok=>{
     setLoading('ret-btn',true,'Confirm return'); hideBanner('ret-banner');
     try {
-      const [freshChk, freshItems] = await Promise.all([readCSV('checkouts.csv'), readCSV('items.csv')]);
+      // Read checkout record first to validate
+      const freshChk = await readCSV('checkouts.csv');
       const c=freshChk[idx];
       if(!c||c['Status']!=='taken'){showBanner('ret-banner','error','Not found','This checkout record is no longer active.');setLoading('ret-btn',false,'Confirm return');return;}
 
+      // Step 1: upload photo first (if any) — this is its own file, no SHA conflict
       let photoPath='';
       if(photoB64){
         const ts=Date.now(); const safeName=c['Item Name'].replace(/[^a-z0-9]/gi,'-').toLowerCase();
@@ -881,28 +883,21 @@ $('ret-btn').addEventListener('click', ()=>{
         await writeFile(photoPath, photoB64, tok);
       }
 
-      freshChk[idx]={...c,'Returned By':retBy,'On Behalf Of':behalf,'Return Timestamp':tsNow(),'Photo Path':photoPath,'Status':'returned'};
+      // Step 2: re-read checkouts fresh (photo upload may have taken time), write updated record
+      const freshChk2 = await readCSV('checkouts.csv');
+      freshChk2[idx]={...freshChk2[idx],'Returned By':retBy,'On Behalf Of':behalf,'Return Timestamp':tsNow(),'Photo Path':photoPath,'Status':'returned'};
+      await writeCSV('checkouts.csv', CHK_HDR, freshChk2, tok);
 
-      // Increment Units Available
-      const updItems=freshItems.map(i=>{
+      // Step 3: re-read items fresh, increment Units Available, write
+      const freshItems = await readCSV('items.csv');
+      const updItems = freshItems.map(i=>{
         if(i['Item Name']===c['Item Name']){
           const total=parseInt(i['Total Units'])||1;
           const ua=Math.min(total,(parseInt(i['Units Available'])||0)+1);
           return {...i,'Units Available':ua.toString()};
         } return i;
       });
-
-      // Write sequentially to avoid SHA conflicts
-      await writeCSV('checkouts.csv', CHK_HDR, freshChk, tok);
-      const latestItems2 = await readCSV('items.csv');
-      const updItems2 = latestItems2.map(i=>{
-        if(i['Item Name']===c['Item Name']){
-          const total=parseInt(i['Total Units'])||1;
-          const ua=Math.min(total,(parseInt(i['Units Available'])||0)+1);
-          return {...i,'Units Available':ua.toString()};
-        } return i;
-      });
-      await writeCSV('items.csv', ITM_HDR, updItems2, tok);
+      await writeCSV('items.csv', ITM_HDR, updItems, tok);
 
       showConfirm('returned', 'Item returned', `<strong>${c['Item Name']}</strong> has been returned by <strong>${retBy}</strong>.${behalf?`<br>On behalf of <strong>${behalf}</strong>.`:''}${photoPath?`<br><span style="color:var(--success);font-size:13px">📷 Photo saved.</span>`:''}`, async () => { await openReturn(); showOnly('return'); });
     } catch(err){showBanner('ret-banner','error','Error',err.message||'Could not save.');}
