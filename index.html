@@ -25,23 +25,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 24px 16px 48px;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; padding: 24px 16px 48px;
     }
     .wrap { max-width: 560px; margin: 0 auto; }
 
-    /* Header */
     header { margin-bottom: 28px; }
     .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
     header h1 { font-size: 26px; font-weight: 700; letter-spacing: -.4px; color: var(--text); }
     header p { margin-top: 6px; font-size: 14px; color: var(--muted); line-height: 1.5; }
 
-    /* Card */
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 24px; margin-bottom: 12px; }
 
-    /* Mode selector */
     .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
     .mode-btn {
       display: flex; flex-direction: column; align-items: flex-start;
@@ -55,14 +50,14 @@
     .mode-btn .label { font-size: 13px; font-weight: 600; color: var(--text); }
     .mode-btn .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-    /* Section label */
     .section-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
 
-    /* Fields */
     .field { margin-bottom: 18px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
     label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
     label .req { color: var(--error); margin-left: 2px; }
-    select, input[type="text"], input[type="date"] {
+    label .opt { color: var(--muted); font-weight: 400; font-size: 11px; margin-left: 4px; }
+    select, input[type="text"], input[type="date"], input[type="password"] {
       width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit;
       color: var(--text); background: var(--surface); border: 1px solid var(--border);
       border-radius: 7px; outline: none; transition: border-color .15s, box-shadow .15s;
@@ -76,11 +71,9 @@
       width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;
       border-top: 5px solid var(--muted); pointer-events: none;
     }
-    .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
     hr.divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
 
-    /* Buttons */
     .btn {
       width: 100%; padding: 12px; font-size: 15px; font-weight: 600; font-family: inherit;
       color: #fff; background: var(--accent); border: none; border-radius: 8px;
@@ -92,13 +85,12 @@
     .btn:disabled { opacity: .5; cursor: not-allowed; }
     .btn.danger { background: var(--error); }
     .btn.danger:hover:not(:disabled) { background: #B91C1C; }
+    .btn.ghost { background: var(--muted); }
     .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    /* Spinner */
     .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Banner */
     .banner { border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.5; margin-top: 16px; display: none; }
     .banner.show { display: block; }
     .banner strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
@@ -106,16 +98,13 @@
     .banner.conflict { background: var(--error-bg); color: var(--error); border: 1px solid #FECACA; }
     .banner.warn { background: var(--warn-bg); color: var(--warn); border: 1px solid #FDE68A; }
 
-    /* Avail strip */
     #avail-strip { font-size: 13px; margin-top: 8px; min-height: 20px; color: var(--muted); }
     #avail-strip.free { color: var(--success); }
     #avail-strip.busy { color: var(--error); }
 
-    /* Skeleton */
     .skeleton { background: linear-gradient(90deg, #E9EAEC 25%, #F3F4F6 50%, #E9EAEC 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; height: 40px; }
     @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
-    /* Reservations table */
     .res-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .res-table th { background: var(--bg); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
     .res-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
@@ -123,36 +112,26 @@
     .res-table tr:hover td { background: var(--bg); }
     .empty-state { padding: 28px; text-align: center; color: var(--muted); font-size: 13px; }
 
-    /* Delete row button */
-    .del-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 2px 6px; border-radius: 4px; transition: color .15s, background .15s; }
-    .del-btn:hover { color: var(--error); background: var(--error-bg); }
-
-    /* Panel toggle */
-    .panel-toggle {
-      width: 100%; display: flex; align-items: center; justify-content: space-between;
-      background: none; border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--muted);
-      cursor: pointer; margin-top: 4px; font-family: inherit; transition: background .15s;
-    }
-    .panel-toggle:hover { background: var(--bg); }
-    .panel-toggle .arrow { transition: transform .2s; }
-    .panel-toggle.open .arrow { transform: rotate(180deg); }
-    .reservations-panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 8px; }
-    .reservations-panel.show { display: block; }
-
-    /* Confirm dialog overlay */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+    /* Token modal */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
     .overlay.show { display: flex; }
-    .dialog { background: var(--surface); border-radius: var(--radius); padding: 24px; max-width: 380px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,.18); }
-    .dialog h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-    .dialog p { font-size: 14px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+    .dialog { background: var(--surface); border-radius: var(--radius); padding: 28px 24px; max-width: 400px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
+    .dialog h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .dialog p { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+    .token-remember { display: flex; align-items: center; gap: 8px; margin: 12px 0 20px; font-size: 13px; color: var(--muted); cursor: pointer; }
+    .token-remember input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+    .token-status { font-size: 12px; color: var(--muted); margin-top: 8px; }
+    .token-status.saved { color: var(--success); }
+
+    .back-btn { background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer; font-family: inherit; }
+    .back-btn:hover { color: var(--text); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 
     @media (max-width: 420px) {
       .card { padding: 20px 16px; }
-      .date-row, .mode-grid, .btn-row { grid-template-columns: 1fr; }
+      .field-row, .mode-grid, .btn-row { grid-template-columns: 1fr; }
       header h1 { font-size: 22px; }
     }
-
     .hidden { display: none !important; }
   </style>
 </head>
@@ -171,7 +150,7 @@
     <div class="skeleton" style="height:24px;width:60%"></div>
   </div>
 
-  <!-- Step 1: Mode selector -->
+  <!-- Mode selector -->
   <div class="card hidden" id="mode-card">
     <div class="section-label">What would you like to do?</div>
     <div class="mode-grid">
@@ -198,11 +177,11 @@
     </div>
   </div>
 
-  <!-- Add reservation form -->
+  <!-- ADD -->
   <div class="card hidden" id="add-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div class="card-header">
       <div class="section-label" style="margin:0;border:none;padding:0">New reservation</div>
-      <button onclick="goHome()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">← Back</button>
+      <button class="back-btn" onclick="goHome()">← Back</button>
     </div>
     <form id="res-form" novalidate>
       <div class="field">
@@ -222,20 +201,26 @@
         </div>
         <div id="avail-strip"></div>
       </div>
-      <hr class="divider" />
-      <div class="field">
-        <div class="date-row">
-          <div>
-            <label for="start-date">From <span class="req">*</span></label>
-            <input type="date" id="start-date" required />
-          </div>
-          <div>
-            <label for="end-date">To <span class="req">*</span></label>
-            <input type="date" id="end-date" required />
-          </div>
-        </div>
-        <div class="hint">Both dates inclusive.</div>
+
+      <!-- Model number — optional, auto-filled from CSV but editable -->
+      <div class="field" id="model-field" style="display:none">
+        <label for="model-number">Model / ID number <span class="opt">(optional)</span></label>
+        <input type="text" id="model-number" placeholder="e.g. PJ-2041" autocomplete="off" />
+        <div class="hint">Pre-filled from inventory. Edit if needed or leave blank.</div>
       </div>
+
+      <hr class="divider" />
+      <div class="field-row">
+        <div>
+          <label for="start-date">From <span class="req">*</span></label>
+          <input type="date" id="start-date" required />
+        </div>
+        <div>
+          <label for="end-date">To <span class="req">*</span></label>
+          <input type="date" id="end-date" required />
+        </div>
+      </div>
+      <div class="hint" style="margin-top:-10px;margin-bottom:18px">Both dates inclusive.</div>
       <hr class="divider" />
       <div class="field">
         <label for="name">Your name <span class="req">*</span></label>
@@ -246,41 +231,37 @@
     </form>
   </div>
 
-  <!-- View reservations -->
+  <!-- VIEW -->
   <div class="card hidden" id="view-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div class="card-header">
       <div class="section-label" style="margin:0;border:none;padding:0">All reservations</div>
-      <button onclick="goHome()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">← Back</button>
+      <button class="back-btn" onclick="goHome()">← Back</button>
     </div>
     <div id="view-table-wrap"></div>
   </div>
 
-  <!-- Modify reservation -->
+  <!-- MODIFY -->
   <div class="card hidden" id="modify-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div class="card-header">
       <div class="section-label" style="margin:0;border:none;padding:0">Modify reservation</div>
-      <button onclick="goHome()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">← Back</button>
+      <button class="back-btn" onclick="goHome()">← Back</button>
     </div>
     <div class="field">
-      <label for="modify-select">Select reservation to modify</label>
+      <label for="modify-select">Select reservation</label>
       <div class="select-wrap">
-        <select id="modify-select">
-          <option value="">Choose a reservation…</option>
-        </select>
+        <select id="modify-select"><option value="">Choose a reservation…</option></select>
       </div>
     </div>
     <div id="modify-fields" class="hidden">
       <hr class="divider" />
-      <div class="field">
-        <div class="date-row">
-          <div>
-            <label for="modify-start">New start date</label>
-            <input type="date" id="modify-start" />
-          </div>
-          <div>
-            <label for="modify-end">New end date</label>
-            <input type="date" id="modify-end" />
-          </div>
+      <div class="field-row">
+        <div>
+          <label for="modify-start">New start date</label>
+          <input type="date" id="modify-start" />
+        </div>
+        <div>
+          <label for="modify-end">New end date</label>
+          <input type="date" id="modify-end" />
         </div>
       </div>
       <div class="field">
@@ -292,40 +273,47 @@
     </div>
   </div>
 
-  <!-- Delete reservation -->
+  <!-- DELETE -->
   <div class="card hidden" id="delete-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div class="card-header">
       <div class="section-label" style="margin:0;border:none;padding:0">Delete reservation</div>
-      <button onclick="goHome()" style="background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit">← Back</button>
+      <button class="back-btn" onclick="goHome()">← Back</button>
     </div>
     <div class="field">
       <label for="delete-select">Select reservation to cancel</label>
       <div class="select-wrap">
-        <select id="delete-select">
-          <option value="">Choose a reservation…</option>
-        </select>
+        <select id="delete-select"><option value="">Choose a reservation…</option></select>
       </div>
     </div>
     <div id="delete-preview" class="hidden" style="margin-top:16px">
       <div class="banner warn show" id="delete-warn"></div>
       <div class="btn-row" style="margin-top:12px">
         <button class="btn danger" id="confirm-delete-btn">Yes, cancel it</button>
-        <button class="btn" style="background:var(--muted)" onclick="goHome()">Never mind</button>
+        <button class="btn ghost" onclick="goHome()">Never mind</button>
       </div>
       <div class="banner" id="delete-banner"></div>
     </div>
   </div>
 </div>
 
-<!-- Confirm dialog (for stale conflict on modify) -->
-<div class="overlay" id="overlay">
+<!-- Token modal — shown only when a write action is attempted -->
+<div class="overlay" id="token-overlay">
   <div class="dialog">
-    <h3 id="dialog-title">Confirm</h3>
-    <p id="dialog-body"></p>
-    <div class="btn-row">
-      <button class="btn danger" id="dialog-confirm">Confirm</button>
-      <button class="btn" style="background:var(--muted)" onclick="closeDialog()">Cancel</button>
+    <h3>Access required</h3>
+    <p>Enter the access token to save changes. This is shared internally with your team.</p>
+    <div class="field">
+      <label for="token-input">Access token</label>
+      <input type="password" id="token-input" placeholder="github_pat_…" autocomplete="off" />
     </div>
+    <label class="token-remember">
+      <input type="checkbox" id="token-remember" checked />
+      Remember on this device
+    </label>
+    <div class="btn-row">
+      <button class="btn" id="token-confirm-btn">Continue</button>
+      <button class="btn ghost" onclick="closeTokenModal()">Cancel</button>
+    </div>
+    <div class="token-status" id="token-status"></div>
   </div>
 </div>
 
@@ -335,56 +323,107 @@ const OWNER  = 'pollats';
 const REPO   = 'inventory_tracker';
 const BRANCH = 'main';
 const RES_HEADERS = ['Category','Item Name','ID / Model Number','Reserved By','Start Date','End Date','Timestamp'];
+const TOKEN_KEY = 'inv_gh_token';
 
-function getToken() {
-  let t = sessionStorage.getItem('gh_token');
-  if (!t) {
-    t = prompt('Enter the access token to enable reservations:');
-    if (t) sessionStorage.setItem('gh_token', t.trim());
-  }
-  return t ? t.trim() : '';
+// ── Token management ──────────────────────────────────────────────────────
+// Token is stored in localStorage (persists across sessions) if user opts in.
+// It is never in the source code.
+// It is only requested when a write action is triggered.
+
+function getSavedToken() {
+  return localStorage.getItem(TOKEN_KEY) || '';
 }
 
-const RAW = (file) => `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data/${file}`;
-const API = (file) => `https://api.github.com/repos/${OWNER}/${REPO}/contents/data/${file}`;
-const ghHeaders = () => ({
-  'Authorization': `Bearer ${getToken()}`,
-  'Accept': 'application/vnd.github+json',
-  'X-GitHub-Api-Version': '2022-11-28'
+function saveToken(t, remember) {
+  if (remember) {
+    localStorage.setItem(TOKEN_KEY, t);
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.setItem(TOKEN_KEY, t); // session-only fallback
+  }
+}
+
+function getActiveToken() {
+  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
+}
+
+// Pending action to run after token is confirmed
+let pendingAction = null;
+
+function requireToken(action) {
+  const existing = getActiveToken();
+  if (existing) {
+    action(existing);
+    return;
+  }
+  // Pre-fill if something is in storage
+  document.getElementById('token-input').value = getSavedToken();
+  updateTokenStatus();
+  pendingAction = action;
+  document.getElementById('token-overlay').classList.add('show');
+  setTimeout(() => document.getElementById('token-input').focus(), 100);
+}
+
+function closeTokenModal() {
+  document.getElementById('token-overlay').classList.remove('show');
+  pendingAction = null;
+}
+
+function updateTokenStatus() {
+  const saved = getSavedToken();
+  const el = document.getElementById('token-status');
+  if (saved) {
+    el.textContent = '✓ A token is saved on this device.';
+    el.className = 'token-status saved';
+  } else {
+    el.textContent = '';
+    el.className = 'token-status';
+  }
+}
+
+document.getElementById('token-confirm-btn').addEventListener('click', () => {
+  const t = document.getElementById('token-input').value.trim();
+  if (!t) { document.getElementById('token-status').textContent = 'Please enter a token.'; return; }
+  const remember = document.getElementById('token-remember').checked;
+  saveToken(t, remember);
+  document.getElementById('token-overlay').classList.remove('show');
+  if (pendingAction) {
+    const action = pendingAction;
+    pendingAction = null;
+    action(t);
+  }
 });
 
-// ── State ─────────────────────────────────────────────────────────────────
-let allItems = [];
+document.getElementById('token-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('token-confirm-btn').click();
+});
 
-// ── CSV helpers ───────────────────────────────────────────────────────────
-function parseCSV(text) {
-  const lines = text.trim().split('\n').filter(l => l.trim());
-  if (lines.length < 1) return [];
-  const headers = lines[0].split(',').map(h => h.trim());
-  return lines.slice(1).map(line => {
-    const vals = line.split(',').map(v => v.trim());
-    return Object.fromEntries(headers.map((h, i) => [h, vals[i] ?? '']));
-  });
+// ── GitHub helpers ────────────────────────────────────────────────────────
+const API = (file) => `https://api.github.com/repos/${OWNER}/${REPO}/contents/data/${file}`;
+
+function ghHeaders(token) {
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
 }
 
-function toCSV(headers, rows) {
-  return [headers.join(','), ...rows.map(r => headers.map(h => r[h] ?? '').join(','))].join('\n');
-}
-
-// ── GitHub read — always fresh, bypasses cache ────────────────────────────
+// Read — no token needed for public repos (raw URL is fine for reads since
+// we use the API endpoint to bypass cache, but public repos don't need auth)
 async function readCSV(filename) {
-  // Use API endpoint (not raw URL) to always get latest content
-  const res = await fetch(API(filename), { headers: ghHeaders() });
+  const token = getActiveToken();
+  const headers = token ? ghHeaders(token) : { 'Accept': 'application/vnd.github+json' };
+  const res = await fetch(API(filename), { headers });
   if (!res.ok) throw new Error(`Could not read ${filename}`);
   const json = await res.json();
   const text = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ''))));
   return parseCSV(text);
 }
 
-// ── GitHub write — read-then-write in one flow ────────────────────────────
-async function writeCSV(filename, headers, rows) {
-  // Get SHA (required by GitHub API to update a file)
-  const metaRes = await fetch(API(filename), { headers: ghHeaders() });
+// Write — always needs token
+async function writeCSV(filename, headers, rows, token) {
+  const metaRes = await fetch(API(filename), { headers: ghHeaders(token) });
   if (!metaRes.ok) throw new Error('Could not fetch file metadata');
   const meta = await metaRes.json();
   const sha = meta.sha;
@@ -394,19 +433,37 @@ async function writeCSV(filename, headers, rows) {
 
   const res = await fetch(API(filename), {
     method: 'PUT',
-    headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message: `Reservation update — ${new Date().toISOString()}`,
-      content: b64,
-      sha
-    })
+    headers: { ...ghHeaders(token), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: `Reservation update — ${new Date().toISOString()}`, content: b64, sha })
   });
   if (!res.ok) {
     const err = await res.json();
-    throw new Error(err.message || 'Failed to write reservation');
+    // If 401, clear saved token so user is prompted again
+    if (res.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
+    }
+    throw new Error(err.message || 'Write failed');
   }
   return res.json();
 }
+
+// ── CSV helpers ───────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  if (!lines.length) return [];
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim());
+    return Object.fromEntries(headers.map((h, i) => [h, vals[i] ?? '']));
+  });
+}
+function toCSV(headers, rows) {
+  return [headers.join(','), ...rows.map(r => headers.map(h => r[h] ?? '').join(','))].join('\n');
+}
+
+// ── State ─────────────────────────────────────────────────────────────────
+let allItems = [];
 
 // ── Date helpers ──────────────────────────────────────────────────────────
 function today() { return new Date().toISOString().split('T')[0]; }
@@ -428,10 +485,7 @@ function showBanner(id, type, title, body) {
   el.className = `banner show ${type}`;
   el.innerHTML = `<strong>${title}</strong>${body}`;
 }
-function hideBanner(id) {
-  const el = document.getElementById(id);
-  el.className = 'banner'; el.innerHTML = '';
-}
+function hideBanner(id) { const el = document.getElementById(id); el.className = 'banner'; el.innerHTML = ''; }
 
 function goHome() {
   ['add-card','view-card','modify-card','delete-card'].forEach(hide);
@@ -439,7 +493,7 @@ function goHome() {
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
 }
 
-function setSubmitting(btnId, yes, label = 'Save') {
+function setLoading(btnId, yes, label) {
   const btn = document.getElementById(btnId);
   btn.disabled = yes;
   btn.innerHTML = yes ? '<div class="spinner"></div> Working…' : label;
@@ -448,11 +502,10 @@ function setSubmitting(btnId, yes, label = 'Save') {
 // ── Mode selector ─────────────────────────────────────────────────────────
 document.querySelectorAll('.mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const mode = btn.dataset.mode;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     hide('mode-card');
-
+    const mode = btn.dataset.mode;
     if (mode === 'add')    openAdd();
     if (mode === 'view')   openView();
     if (mode === 'modify') openModify();
@@ -472,6 +525,8 @@ function resetAddForm() {
   const itemSel = document.getElementById('item');
   itemSel.innerHTML = '<option value="">Select an item…</option>';
   itemSel.disabled = true;
+  document.getElementById('model-number').value = '';
+  document.getElementById('model-field').style.display = 'none';
   document.getElementById('start-date').value = today();
   document.getElementById('start-date').min = today();
   document.getElementById('end-date').value = '';
@@ -495,11 +550,28 @@ function populateItems(category) {
   allItems.filter(i => i['Category'] === category).forEach(item => {
     const o = document.createElement('option');
     o.value = item['Item Name'];
-    o.textContent = item['ID / Model Number'] ? `${item['Item Name']} (${item['ID / Model Number']})` : item['Item Name'];
+    o.textContent = item['Item Name'];
     sel.appendChild(o);
   });
   sel.disabled = false;
+  // Reset model field when category changes
+  document.getElementById('model-number').value = '';
+  document.getElementById('model-field').style.display = 'none';
   setAvailStrip('');
+}
+
+function onItemSelected(itemName) {
+  if (!itemName) {
+    document.getElementById('model-field').style.display = 'none';
+    document.getElementById('model-number').value = '';
+    return;
+  }
+  // Pre-fill model number from items CSV
+  const itemDetails = allItems.find(i => i['Item Name'] === itemName) || {};
+  const modelField = document.getElementById('model-field');
+  const modelInput = document.getElementById('model-number');
+  modelInput.value = itemDetails['ID / Model Number'] || '';
+  modelField.style.display = 'block';
 }
 
 function setAvailStrip(text, cls) {
@@ -535,10 +607,22 @@ async function checkAvailability() {
 
 document.getElementById('category').addEventListener('change', e => {
   if (e.target.value) populateItems(e.target.value);
-  else { document.getElementById('item').innerHTML = '<option value="">Select an item…</option>'; document.getElementById('item').disabled = true; setAvailStrip(''); }
+  else {
+    document.getElementById('item').innerHTML = '<option value="">Select an item…</option>';
+    document.getElementById('item').disabled = true;
+    document.getElementById('model-field').style.display = 'none';
+    setAvailStrip('');
+  }
   hideBanner('add-banner'); updateSubmitState();
 });
-document.getElementById('item').addEventListener('change', () => { hideBanner('add-banner'); checkAvailability(); updateSubmitState(); });
+
+document.getElementById('item').addEventListener('change', e => {
+  onItemSelected(e.target.value);
+  hideBanner('add-banner');
+  checkAvailability();
+  updateSubmitState();
+});
+
 document.getElementById('start-date').addEventListener('change', e => {
   const endInput = document.getElementById('end-date');
   endInput.min = e.target.value;
@@ -548,47 +632,46 @@ document.getElementById('start-date').addEventListener('change', e => {
 document.getElementById('end-date').addEventListener('change', () => { hideBanner('add-banner'); checkAvailability(); updateSubmitState(); });
 document.getElementById('name').addEventListener('input', updateSubmitState);
 
-document.getElementById('res-form').addEventListener('submit', async e => {
+document.getElementById('res-form').addEventListener('submit', e => {
   e.preventDefault();
   hideBanner('add-banner');
-  setSubmitting('submit-btn', true, 'Reserve item');
 
   const category  = document.getElementById('category').value;
   const itemName  = document.getElementById('item').value;
+  const modelNum  = document.getElementById('model-number').value.trim();
   const startDate = document.getElementById('start-date').value;
   const endDate   = document.getElementById('end-date').value;
   const name      = document.getElementById('name').value.trim();
 
-  try {
-    // Always read fresh from GitHub before writing
-    const freshReservations = await readCSV('reservations.csv');
-    const conflict = findConflict(freshReservations, itemName, startDate, endDate);
-    if (conflict) {
-      showBanner('add-banner', 'conflict', 'Not available',
-        `${itemName} is already booked by <strong>${conflict['Reserved By']}</strong> from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}.`);
-      setAvailStrip(`Not available — booked by ${conflict['Reserved By']} from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}`, 'busy');
-      setSubmitting('submit-btn', false, 'Reserve item');
-      return;
+  requireToken(async (token) => {
+    setLoading('submit-btn', true, 'Reserve item');
+    try {
+      const freshReservations = await readCSV('reservations.csv');
+      const conflict = findConflict(freshReservations, itemName, startDate, endDate);
+      if (conflict) {
+        showBanner('add-banner', 'conflict', 'Not available',
+          `${itemName} is already booked by <strong>${conflict['Reserved By']}</strong> from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}.`);
+        setAvailStrip(`Not available — booked by ${conflict['Reserved By']} from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}`, 'busy');
+        setLoading('submit-btn', false, 'Reserve item');
+        return;
+      }
+
+      const newRow = {
+        'Category': category, 'Item Name': itemName,
+        'ID / Model Number': modelNum,
+        'Reserved By': name, 'Start Date': startDate, 'End Date': endDate,
+        'Timestamp': new Date().toISOString()
+      };
+
+      await writeCSV('reservations.csv', RES_HEADERS, [...freshReservations, newRow], token);
+      showBanner('add-banner', 'success', 'Reserved',
+        `${itemName} is booked for <strong>${name}</strong> from ${fmt(startDate)} to ${fmt(endDate)}.`);
+      resetAddForm();
+    } catch (err) {
+      showBanner('add-banner', 'conflict', 'Something went wrong', err.message || 'Could not save. Please try again.');
     }
-
-    const itemDetails = allItems.find(i => i['Item Name'] === itemName) || {};
-    const newRow = {
-      'Category': category, 'Item Name': itemName,
-      'ID / Model Number': itemDetails['ID / Model Number'] || '',
-      'Reserved By': name, 'Start Date': startDate, 'End Date': endDate,
-      'Timestamp': new Date().toISOString()
-    };
-
-    await writeCSV('reservations.csv', RES_HEADERS, [...freshReservations, newRow]);
-
-    showBanner('add-banner', 'success', 'Reserved',
-      `${itemName} is booked for <strong>${name}</strong> from ${fmt(startDate)} to ${fmt(endDate)}.`);
-    resetAddForm();
-
-  } catch (err) {
-    showBanner('add-banner', 'conflict', 'Something went wrong', 'Could not save the reservation. Please try again.');
-  }
-  setSubmitting('submit-btn', false, 'Reserve item');
+    setLoading('submit-btn', false, 'Reserve item');
+  });
 });
 
 // ── VIEW ──────────────────────────────────────────────────────────────────
@@ -606,16 +689,15 @@ async function openView() {
 function renderViewTable(reservations) {
   const active = reservations.filter(r => r['End Date'] >= today()).sort((a,b) => a['Start Date'].localeCompare(b['Start Date']));
   const past   = reservations.filter(r => r['End Date'] < today()).sort((a,b) => b['Start Date'].localeCompare(a['Start Date']));
-
   let html = '';
   if (!active.length && !past.length) {
     html = '<div class="empty-state">No reservations yet.</div>';
   } else {
     if (active.length) {
       html += `<div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Current & upcoming</div>`;
-      html += `<table class="res-table"><thead><tr><th>Item</th><th>Reserved by</th><th>From</th><th>To</th></tr></thead><tbody>`;
+      html += `<table class="res-table"><thead><tr><th>Item</th><th>Model / ID</th><th>Reserved by</th><th>From</th><th>To</th></tr></thead><tbody>`;
       active.forEach(r => {
-        html += `<tr><td>${r['Item Name']}${r['ID / Model Number'] ? `<br><span style="color:var(--muted);font-size:11px">${r['ID / Model Number']}</span>` : ''}</td><td>${r['Reserved By']}</td><td>${fmt(r['Start Date'])}</td><td>${fmt(r['End Date'])}</td></tr>`;
+        html += `<tr><td>${r['Item Name']}</td><td style="color:var(--muted)">${r['ID / Model Number'] || '—'}</td><td>${r['Reserved By']}</td><td>${fmt(r['Start Date'])}</td><td>${fmt(r['End Date'])}</td></tr>`;
       });
       html += `</tbody></table>`;
     }
@@ -642,9 +724,9 @@ async function openModify() {
     const reservations = await readCSV('reservations.csv');
     const active = reservations.filter(r => r['End Date'] >= today());
     sel.innerHTML = '<option value="">Choose a reservation…</option>';
-    active.forEach((r, i) => {
+    active.forEach(r => {
       const o = document.createElement('option');
-      o.value = reservations.indexOf(r); // index in full array
+      o.value = reservations.indexOf(r);
       o.textContent = `${r['Item Name']} — ${r['Reserved By']} (${fmt(r['Start Date'])} to ${fmt(r['End Date'])})`;
       sel.appendChild(o);
     });
@@ -668,38 +750,36 @@ document.getElementById('modify-select').addEventListener('change', async functi
   show('modify-fields');
 });
 
-document.getElementById('modify-btn').addEventListener('click', async () => {
-  const idx       = parseInt(document.getElementById('modify-select').value);
-  const newStart  = document.getElementById('modify-start').value;
-  const newEnd    = document.getElementById('modify-end').value;
-  const newName   = document.getElementById('modify-name').value.trim();
+document.getElementById('modify-btn').addEventListener('click', () => {
+  const idx      = parseInt(document.getElementById('modify-select').value);
+  const newStart = document.getElementById('modify-start').value;
+  const newEnd   = document.getElementById('modify-end').value;
+  const newName  = document.getElementById('modify-name').value.trim();
   if (!newStart || !newEnd || !newName) { showBanner('modify-banner', 'conflict', 'Missing fields', 'Please fill in all fields.'); return; }
 
-  setSubmitting('modify-btn', true, 'Save changes');
-  hideBanner('modify-banner');
-
-  try {
-    const freshReservations = await readCSV('reservations.csv');
-    const r = freshReservations[idx];
-    if (!r) { showBanner('modify-banner', 'conflict', 'Not found', 'This reservation no longer exists.'); setSubmitting('modify-btn', false, 'Save changes'); return; }
-
-    const conflict = findConflict(freshReservations, r['Item Name'], newStart, newEnd, idx);
-    if (conflict) {
-      showBanner('modify-banner', 'conflict', 'Conflict',
-        `${r['Item Name']} is booked by <strong>${conflict['Reserved By']}</strong> from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])} during that period.`);
-      setSubmitting('modify-btn', false, 'Save changes'); return;
+  requireToken(async (token) => {
+    setLoading('modify-btn', true, 'Save changes');
+    hideBanner('modify-banner');
+    try {
+      const freshReservations = await readCSV('reservations.csv');
+      const r = freshReservations[idx];
+      if (!r) { showBanner('modify-banner', 'conflict', 'Not found', 'This reservation no longer exists.'); setLoading('modify-btn', false, 'Save changes'); return; }
+      const conflict = findConflict(freshReservations, r['Item Name'], newStart, newEnd, idx);
+      if (conflict) {
+        showBanner('modify-banner', 'conflict', 'Conflict',
+          `${r['Item Name']} is booked by <strong>${conflict['Reserved By']}</strong> from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])} during that period.`);
+        setLoading('modify-btn', false, 'Save changes'); return;
+      }
+      freshReservations[idx] = { ...r, 'Reserved By': newName, 'Start Date': newStart, 'End Date': newEnd, 'Timestamp': new Date().toISOString() };
+      await writeCSV('reservations.csv', RES_HEADERS, freshReservations, token);
+      showBanner('modify-banner', 'success', 'Updated', `Reservation updated for <strong>${newName}</strong> from ${fmt(newStart)} to ${fmt(newEnd)}.`);
+      hide('modify-fields');
+      document.getElementById('modify-select').value = '';
+    } catch (err) {
+      showBanner('modify-banner', 'conflict', 'Error', err.message || 'Could not save. Please try again.');
     }
-
-    freshReservations[idx] = { ...r, 'Reserved By': newName, 'Start Date': newStart, 'End Date': newEnd, 'Timestamp': new Date().toISOString() };
-    await writeCSV('reservations.csv', RES_HEADERS, freshReservations);
-    showBanner('modify-banner', 'success', 'Updated', `Reservation updated for <strong>${newName}</strong> from ${fmt(newStart)} to ${fmt(newEnd)}.`);
-    hide('modify-fields');
-    document.getElementById('modify-select').value = '';
-
-  } catch (err) {
-    showBanner('modify-banner', 'conflict', 'Error', 'Could not save changes. Please try again.');
-  }
-  setSubmitting('modify-btn', false, 'Save changes');
+    setLoading('modify-btn', false, 'Save changes');
+  });
 });
 
 // ── DELETE ────────────────────────────────────────────────────────────────
@@ -736,36 +816,34 @@ document.getElementById('delete-select').addEventListener('change', async functi
   show('delete-preview');
 });
 
-document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+document.getElementById('confirm-delete-btn').addEventListener('click', () => {
   const idx = parseInt(document.getElementById('delete-select').value);
-  setSubmitting('confirm-delete-btn', true, 'Yes, cancel it');
-  hideBanner('delete-banner');
-  try {
-    const freshReservations = await readCSV('reservations.csv');
-    freshReservations.splice(idx, 1);
-    await writeCSV('reservations.csv', RES_HEADERS, freshReservations);
-    showBanner('delete-banner', 'success', 'Cancelled', 'The reservation has been removed.');
-    hide('delete-preview');
-    document.getElementById('delete-select').value = '';
-    // Refresh dropdown
-    await openDelete();
-    show('delete-card');
-  } catch {
-    showBanner('delete-banner', 'conflict', 'Error', 'Could not delete. Please try again.');
-  }
-  setSubmitting('confirm-delete-btn', false, 'Yes, cancel it');
+  requireToken(async (token) => {
+    setLoading('confirm-delete-btn', true, 'Yes, cancel it');
+    hideBanner('delete-banner');
+    try {
+      const freshReservations = await readCSV('reservations.csv');
+      freshReservations.splice(idx, 1);
+      await writeCSV('reservations.csv', RES_HEADERS, freshReservations, token);
+      showBanner('delete-banner', 'success', 'Cancelled', 'The reservation has been removed.');
+      hide('delete-preview');
+      document.getElementById('delete-select').value = '';
+      await openDelete();
+      show('delete-card');
+    } catch (err) {
+      showBanner('delete-banner', 'conflict', 'Error', err.message || 'Could not delete. Please try again.');
+    }
+    setLoading('confirm-delete-btn', false, 'Yes, cancel it');
+  });
 });
 
-// ── Dialog ────────────────────────────────────────────────────────────────
-function closeDialog() { document.getElementById('overlay').classList.remove('show'); }
-
-// ── Init ──────────────────────────────────────────────────────────────────
+// ── Init — no token needed to load ───────────────────────────────────────
 async function init() {
   try {
     allItems = await readCSV('items.csv');
     hide('loading-card');
     show('mode-card');
-  } catch (err) {
+  } catch {
     document.getElementById('loading-card').innerHTML =
       '<div style="color:var(--error);font-size:14px">Failed to load inventory. Please refresh.</div>';
   }
