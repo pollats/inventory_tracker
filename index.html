@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Reservations</title>
+  <style>
+    /* ── Tokens ─────────────────────────────────────── */
+    :root {
+      --bg:        #F5F6F8;
+      --surface:   #FFFFFF;
+      --border:    #E2E5EA;
+      --text:      #1C1F26;
+      --muted:     #6B7280;
+      --accent:    #2563EB;
+      --accent-dk: #1D4ED8;
+      --success:   #16A34A;
+      --success-bg:#F0FDF4;
+      --error:     #DC2626;
+      --error-bg:  #FEF2F2;
+      --radius:    10px;
+      --shadow:    0 1px 4px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+    }
+
+    /* ── Reset ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    /* ── Layout ──────────────────────────────────────── */
+    .wrap {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ──────────────────────────────────────── */
+    header {
+      margin-bottom: 28px;
+    }
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -.4px;
+      line-height: 1.2;
+      color: var(--text);
+    }
+    header p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Card ────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 24px;
+    }
+
+    /* ── Section label ───────────────────────────────── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Form ────────────────────────────────────────── */
+    .field {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    label .req { color: var(--error); margin-left: 2px; }
+    select, input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    select:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    select:disabled, input:disabled {
+      background: var(--bg);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+    .select-wrap {
+      position: relative;
+    }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid var(--muted);
+      pointer-events: none;
+    }
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Divider ─────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 22px 0;
+    }
+
+    /* ── Button ──────────────────────────────────────── */
+    .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s, opacity .15s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:hover:not(:disabled) { background: var(--accent-dk); }
+    .btn:active:not(:disabled) { transform: scale(.99); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Spinner ─────────────────────────────────────── */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Banner ──────────────────────────────────────── */
+    .banner {
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-top: 16px;
+      display: none;
+    }
+    .banner.show { display: block; }
+    .banner strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .banner.success { background: var(--success-bg); color: var(--success); border: 1px solid #BBF7D0; }
+    .banner.conflict { background: var(--error-bg); color: var(--error); border: 1px solid #FECACA; }
+
+    /* ── Availability strip ──────────────────────────── */
+    #avail-strip {
+      font-size: 13px;
+      margin-top: 8px;
+      min-height: 20px;
+      color: var(--muted);
+    }
+    #avail-strip.free  { color: var(--success); }
+    #avail-strip.busy  { color: var(--error); }
+
+    /* ── Loading skeleton ────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, #E9EAEC 25%, #F3F4F6 50%, #E9EAEC 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 6px;
+      height: 40px;
+    }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    /* ── Reservations panel ──────────────────────────── */
+    .panel-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      margin-top: 16px;
+      font-family: inherit;
+      transition: background .15s;
+    }
+    .panel-toggle:hover { background: var(--bg); }
+    .panel-toggle .arrow { transition: transform .2s; }
+    .panel-toggle.open .arrow { transform: rotate(180deg); }
+
+    .reservations-panel {
+      display: none;
+      margin-top: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .reservations-panel.show { display: block; }
+
+    .res-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .res-table th {
+      background: var(--bg);
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .res-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: top;
+    }
+    .res-table tr:last-child td { border-bottom: none; }
+    .res-table tr:hover td { background: var(--bg); }
+    .empty-state {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 420px) {
+      .card { padding: 20px 16px; }
+      .date-row { grid-template-columns: 1fr; }
+      header h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Internal tool</div>
+    <h1>Reserve an item</h1>
+    <p>Check availability and book inventory for multi-day use.</p>
+  </header>
+
+  <div class="card" id="main-card">
+    <!-- Loading state -->
+    <div id="loading-state">
+      <div class="skeleton" style="margin-bottom:12px"></div>
+      <div class="skeleton" style="margin-bottom:12px"></div>
+      <div class="skeleton" style="height:24px;width:60%"></div>
+    </div>
+
+    <!-- Form (hidden until data loads) -->
+    <form id="res-form" style="display:none" novalidate>
+
+      <div class="section-label">What do you need?</div>
+
+      <div class="field">
+        <label for="category">Category <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select id="category" required>
+            <option value="">Select a category…</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="item">Item <span class="req">*</span></label>
+        <div class="select-wrap">
+          <select id="item" required disabled>
+            <option value="">Select an item…</option>
+          </select>
+        </div>
+        <div id="avail-strip"></div>
+      </div>
+
+      <hr class="divider" />
+      <div class="section-label">When do you need it?</div>
+
+      <div class="field">
+        <div class="date-row">
+          <div>
+            <label for="start-date">From <span class="req">*</span></label>
+            <input type="date" id="start-date" required />
+          </div>
+          <div>
+            <label for="end-date">To <span class="req">*</span></label>
+            <input type="date" id="end-date" required />
+          </div>
+        </div>
+        <div class="hint">Both dates are inclusive.</div>
+      </div>
+
+      <hr class="divider" />
+      <div class="section-label">Who's reserving?</div>
+
+      <div class="field">
+        <label for="name">Your name <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="e.g. Sarah Chen" required autocomplete="name" />
+      </div>
+
+      <button type="submit" class="btn" id="submit-btn" disabled>
+        Reserve item
+      </button>
+
+      <div class="banner" id="banner"></div>
+
+    </form>
+  </div>
+
+  <!-- Existing reservations panel -->
+  <button class="panel-toggle" id="panel-toggle" style="display:none">
+    <span>View all current reservations</span>
+    <span class="arrow">▾</span>
+  </button>
+  <div class="reservations-panel" id="res-panel">
+    <table class="res-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Reserved by</th>
+          <th>From</th>
+          <th>To</th>
+        </tr>
+      </thead>
+      <tbody id="res-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────
+const OWNER  = 'pollats';
+const REPO   = 'inventory_tracker';
+const BRANCH = 'main';
+const TOKEN  = getToken(); // retrieved from session — never stored in code
+
+
+// ── Token gate (keeps token out of source code) ───────────────────────────
+function getToken() {
+  let t = sessionStorage.getItem('gh_token');
+  if (!t) {
+    t = prompt('Enter the access token to enable reservations:');
+    if (t) sessionStorage.setItem('gh_token', t.trim());
+  }
+  return t ? t.trim() : '';
+}
+
+const RAW = (file) =>
+  `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/data/${file}`;
+const API = (file) =>
+  `https://api.github.com/repos/${OWNER}/${REPO}/contents/data/${file}`;
+const HEADERS = {
+  'Authorization': `Bearer ${TOKEN}`,
+  'Accept': 'application/vnd.github+json',
+  'X-GitHub-Api-Version': '2022-11-28'
+};
+
+// ── State ─────────────────────────────────────────────────────────────────
+let allItems = [];
+let allReservations = [];
+
+// ── CSV helpers ───────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 1) return [];
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim());
+    return Object.fromEntries(headers.map((h, i) => [h, vals[i] ?? '']));
+  });
+}
+
+function toCSV(headers, rows) {
+  const header = headers.join(',');
+  const body = rows.map(r => headers.map(h => r[h] ?? '').join(',')).join('\n');
+  return header + '\n' + body;
+}
+
+// ── GitHub read/write ─────────────────────────────────────────────────────
+async function readCSV(filename) {
+  const res = await fetch(RAW(filename) + '?t=' + Date.now());
+  if (!res.ok) throw new Error(`Could not read ${filename}`);
+  return parseCSV(await res.text());
+}
+
+async function writeCSV(filename, headers, rows) {
+  // Get current SHA
+  const meta = await fetch(API(filename), { headers: HEADERS });
+  const metaJSON = await meta.json();
+  const sha = metaJSON.sha;
+
+  const content = toCSV(headers, rows);
+  const b64 = btoa(unescape(encodeURIComponent(content)));
+
+  const res = await fetch(API(filename), {
+    method: 'PUT',
+    headers: { ...HEADERS, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: `Reservation update — ${new Date().toISOString()}`,
+      content: b64,
+      sha
+    })
+  });
+  if (!res.ok) throw new Error('Failed to write reservation');
+  return res.json();
+}
+
+// ── Date helpers ──────────────────────────────────────────────────────────
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function fmt(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function overlaps(existStart, existEnd, reqStart, reqEnd) {
+  return existStart <= reqEnd && existEnd >= reqStart;
+}
+
+function findConflict(itemName, startDate, endDate) {
+  return allReservations.find(r =>
+    r['Item Name'] === itemName &&
+    overlaps(r['Start Date'], r['End Date'], startDate, endDate)
+  ) || null;
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+function showBanner(type, title, body) {
+  const el = document.getElementById('banner');
+  el.className = `banner show ${type}`;
+  el.innerHTML = `<strong>${title}</strong>${body}`;
+}
+
+function hideBanner() {
+  const el = document.getElementById('banner');
+  el.className = 'banner';
+  el.innerHTML = '';
+}
+
+function setAvailStrip(text, cls) {
+  const el = document.getElementById('avail-strip');
+  el.textContent = text;
+  el.className = cls || '';
+}
+
+function updateSubmitState() {
+  const cat   = document.getElementById('category').value;
+  const item  = document.getElementById('item').value;
+  const start = document.getElementById('start-date').value;
+  const end   = document.getElementById('end-date').value;
+  const name  = document.getElementById('name').value.trim();
+  document.getElementById('submit-btn').disabled = !(cat && item && start && end && name);
+}
+
+function setSubmitting(yes) {
+  const btn = document.getElementById('submit-btn');
+  if (yes) {
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Checking…';
+  } else {
+    btn.innerHTML = 'Reserve item';
+    updateSubmitState();
+  }
+}
+
+// ── Populate dropdowns ────────────────────────────────────────────────────
+function populateCategories() {
+  const cats = [...new Set(allItems.map(i => i['Category']))].sort();
+  const sel = document.getElementById('category');
+  sel.innerHTML = '<option value="">Select a category…</option>';
+  cats.forEach(c => {
+    const o = document.createElement('option');
+    o.value = o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+function populateItems(category) {
+  const sel = document.getElementById('item');
+  sel.innerHTML = '<option value="">Select an item…</option>';
+  const filtered = allItems.filter(i => i['Category'] === category);
+  filtered.forEach(item => {
+    const o = document.createElement('option');
+    o.value = item['Item Name'];
+    o.textContent = item['ID / Model Number']
+      ? `${item['Item Name']} (${item['ID / Model Number']})`
+      : item['Item Name'];
+    sel.appendChild(o);
+  });
+  sel.disabled = false;
+  setAvailStrip('');
+}
+
+// ── Reservations table ────────────────────────────────────────────────────
+function renderReservationsTable() {
+  const tbody = document.getElementById('res-tbody');
+  const today_ = today();
+  const active = allReservations
+    .filter(r => r['End Date'] >= today_)
+    .sort((a, b) => a['Start Date'].localeCompare(b['Start Date']));
+
+  if (!active.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No current or upcoming reservations.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = active.map(r => `
+    <tr>
+      <td>${r['Item Name']}${r['ID / Model Number'] ? `<br><span style="color:var(--muted);font-size:11px">${r['ID / Model Number']}</span>` : ''}</td>
+      <td>${r['Reserved By']}</td>
+      <td>${fmt(r['Start Date'])}</td>
+      <td>${fmt(r['End Date'])}</td>
+    </tr>
+  `).join('');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    [allItems, allReservations] = await Promise.all([
+      readCSV('items.csv'),
+      readCSV('reservations.csv')
+    ]);
+
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('res-form').style.display = 'block';
+    document.getElementById('panel-toggle').style.display = 'flex';
+
+    populateCategories();
+    renderReservationsTable();
+
+    // Set today as default start date
+    const startInput = document.getElementById('start-date');
+    startInput.min = today();
+    startInput.value = today();
+    const endInput = document.getElementById('end-date');
+    endInput.min = today();
+
+  } catch (err) {
+    document.getElementById('loading-state').innerHTML =
+      `<div style="color:var(--error);font-size:14px">Failed to load inventory data. Please refresh and try again.</div>`;
+  }
+}
+
+// ── Event listeners ───────────────────────────────────────────────────────
+document.getElementById('category').addEventListener('change', e => {
+  const cat = e.target.value;
+  const itemSel = document.getElementById('item');
+  if (cat) {
+    populateItems(cat);
+  } else {
+    itemSel.innerHTML = '<option value="">Select an item…</option>';
+    itemSel.disabled = true;
+    setAvailStrip('');
+  }
+  hideBanner();
+  updateSubmitState();
+});
+
+document.getElementById('item').addEventListener('change', () => {
+  hideBanner();
+  checkAvailability();
+  updateSubmitState();
+});
+
+document.getElementById('start-date').addEventListener('change', e => {
+  const endInput = document.getElementById('end-date');
+  endInput.min = e.target.value;
+  if (endInput.value && endInput.value < e.target.value) {
+    endInput.value = e.target.value;
+  }
+  hideBanner();
+  checkAvailability();
+  updateSubmitState();
+});
+
+document.getElementById('end-date').addEventListener('change', () => {
+  hideBanner();
+  checkAvailability();
+  updateSubmitState();
+});
+
+document.getElementById('name').addEventListener('input', updateSubmitState);
+
+function checkAvailability() {
+  const item  = document.getElementById('item').value;
+  const start = document.getElementById('start-date').value;
+  const end   = document.getElementById('end-date').value;
+  if (!item || !start || !end) { setAvailStrip(''); return; }
+
+  const conflict = findConflict(item, start, end);
+  if (conflict) {
+    setAvailStrip(
+      `Not available — booked by ${conflict['Reserved By']} from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}`,
+      'busy'
+    );
+  } else {
+    setAvailStrip('Available for these dates ✓', 'free');
+  }
+}
+
+document.getElementById('res-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  hideBanner();
+  setSubmitting(true);
+
+  const category = document.getElementById('category').value;
+  const itemName = document.getElementById('item').value;
+  const startDate = document.getElementById('start-date').value;
+  const endDate   = document.getElementById('end-date').value;
+  const name      = document.getElementById('name').value.trim();
+
+  try {
+    // Re-fetch fresh reservations to avoid stale conflict checks
+    allReservations = await readCSV('reservations.csv');
+
+    const conflict = findConflict(itemName, startDate, endDate);
+    if (conflict) {
+      showBanner('conflict',
+        'Not available',
+        `${itemName} is already booked by <strong>${conflict['Reserved By']}</strong> from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}.`
+      );
+      setSubmitting(false);
+      checkAvailability();
+      return;
+    }
+
+    // Find item details for ID/model
+    const itemDetails = allItems.find(i => i['Item Name'] === itemName) || {};
+    const idModel = itemDetails['ID / Model Number'] || '';
+
+    // Build new reservation row
+    const newRow = {
+      'Category':         category,
+      'Item Name':        itemName,
+      'ID / Model Number': idModel,
+      'Reserved By':      name,
+      'Start Date':       startDate,
+      'End Date':         endDate,
+      'Timestamp':        new Date().toISOString()
+    };
+
+    const headers = ['Category','Item Name','ID / Model Number','Reserved By','Start Date','End Date','Timestamp'];
+    await writeCSV('reservations.csv', headers, [...allReservations, newRow]);
+
+    allReservations.push(newRow);
+    renderReservationsTable();
+
+    showBanner('success',
+      'Reserved',
+      `${itemName} is booked for <strong>${name}</strong> from ${fmt(startDate)} to ${fmt(endDate)}.`
+    );
+
+    // Reset form
+    document.getElementById('category').value = '';
+    document.getElementById('item').innerHTML = '<option value="">Select an item…</option>';
+    document.getElementById('item').disabled = true;
+    document.getElementById('start-date').value = today();
+    document.getElementById('end-date').value = '';
+    document.getElementById('name').value = '';
+    setAvailStrip('');
+
+  } catch (err) {
+    showBanner('conflict', 'Something went wrong', 'Could not save the reservation. Please try again.');
+  }
+
+  setSubmitting(false);
+});
+
+// ── Panel toggle ──────────────────────────────────────────────────────────
+document.getElementById('panel-toggle').addEventListener('click', function() {
+  this.classList.toggle('open');
+  document.getElementById('res-panel').classList.toggle('show');
+});
+
+// ── Start ─────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
