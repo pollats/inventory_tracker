@@ -968,7 +968,7 @@ $('ret-btn').addEventListener('click', ()=>{
 
       // Step 2: re-read checkouts fresh (photo upload may have taken time), write updated record
       const freshChk2 = await readCSV('checkouts.csv');
-      freshChk2[idx]={...freshChk2[idx],'Returned By':retBy,'On Behalf Of':behalf,'Return Timestamp':tsNow(),'Photo Path':photoPath,'Status':'returned'};
+      freshChk2[idx]={...freshChk2[idx],'Returned By':retBy,'On Behalf Of':behalf,'Return Timestamp':tsNow(),'Photo Path':'','Status':'returned'};
       await writeCSV('checkouts.csv', CHK_HDR, freshChk2, tok);
       await sleep(400);
       // Step 3: re-read items fresh, increment Units Available, write
