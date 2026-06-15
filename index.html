@@ -479,7 +479,6 @@ const today = () => new Date().toISOString().split('T')[0];
 const fmt = d => { if (!d) return ''; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y}`; };
 const overlaps = (es,ee,rs,re) => es <= re && ee >= rs;
 const tsNow = () => new Date().toISOString();
-const resID = () => 'R' + Date.now();
 
 // ── Availability ──────────────────────────────────────────────────────────
 // Available = Units Available (already reflects physical stock) minus
@@ -494,7 +493,7 @@ function calcAvailable(item, startDate, endDate, reservations, checkouts) {
   const overlapRes = reservations.filter(r =>
     r['Item Name'] === iName &&
     overlaps(r['Start Date'], r['End Date'], startDate, endDate) &&
-    !takenResIDs.has(r['_id'])
+    !takenResIDs.has(r['Timestamp'])
   ).length;
 
   return totalAvail - overlapRes;
@@ -658,11 +657,8 @@ $('res-form').addEventListener('submit', e => {
         showBanner('r-banner','error','Not available',`All units of ${iName} are taken or reserved for these dates.`);
         setLoading('r-submit',false,'Reserve item'); return;
       }
-      const id=resID();
-      const newRow={'Category':cat,'Item Name':iName,'ID / Model Number':model,'Reserved By':name,'Start Date':sDate,'End Date':eDate,'Timestamp':tsNow(),'_id':id};
-      // Store _id in timestamp field prefix for reference (we use a separate _id column trick — simpler: use timestamp as ID)
-      const rowToSave={...newRow}; delete rowToSave['_id'];
-      rowToSave['Timestamp']=id; // reuse Timestamp as unique ID (ISO timestamp is unique enough)
+      const uniqueID = 'R' + Date.now();
+      const rowToSave={'Category':cat,'Item Name':iName,'ID / Model Number':model,'Reserved By':name,'Start Date':sDate,'End Date':eDate,'Timestamp':uniqueID};
       await writeCSV('reservations.csv', RES_HDR, [...freshRes.map(r=>({...r})), rowToSave], tok);
       showConfirm('reservation', 'Reservation confirmed', `<strong>${iName}</strong> has been booked for <strong>${name}</strong><br>from ${fmt(sDate)} to ${fmt(eDate)}.`, () => { resetResForm(); populateCats(); });
     } catch(err) { showBanner('r-banner','error','Error',err.message||'Could not save.'); }
@@ -798,15 +794,15 @@ $('take-sel').addEventListener('change', async function(){
 });
 
 $('take-btn').addEventListener('click', ()=>{
-  const resID=$('take-sel').value;
+  const takeResID=$('take-sel').value;
   requireToken(async tok=>{
     setLoading('take-btn',true,'Confirm — I\'m taking this item'); hideBanner('take-banner');
     try {
       const [freshRes, freshChk, freshItems] = await Promise.all([readCSV('reservations.csv'), readCSV('checkouts.csv'), readCSV('items.csv')]);
-      const r=freshRes.find(x=>x['Timestamp']===resID);
+      const r=freshRes.find(x=>x['Timestamp']===takeResID);
       if(!r){showBanner('take-banner','error','Not found','Reservation not found.');setLoading('take-btn',false,'Confirm — I\'m taking this item');return;}
       // Add checkout record
-      const newChk={'Item Name':r['Item Name'],'ID / Model Number':r['ID / Model Number'],'Reservation ID':resID,'Taken By':r['Reserved By'],'Taken Timestamp':tsNow(),'Returned By':'','On Behalf Of':'','Return Timestamp':'','Photo Path':'','Status':'taken'};
+      const newChk={'Item Name':r['Item Name'],'ID / Model Number':r['ID / Model Number'],'Reservation ID':takeResID,'Taken By':r['Reserved By'],'Taken Timestamp':tsNow(),'Returned By':'','On Behalf Of':'','Return Timestamp':'','Photo Path':'','Status':'taken'};
       // Decrement Units Available
       const updItems=freshItems.map(i=>{
         if(i['Item Name']===r['Item Name']){
