@@ -1,853 +1,919 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inventory Reservations</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventory</title>
   <style>
     :root {
-      --bg:        #F5F6F8;
-      --surface:   #FFFFFF;
-      --border:    #E2E5EA;
-      --text:      #1C1F26;
-      --muted:     #6B7280;
-      --accent:    #2563EB;
-      --accent-dk: #1D4ED8;
-      --success:   #16A34A;
-      --success-bg:#F0FDF4;
-      --error:     #DC2626;
-      --error-bg:  #FEF2F2;
-      --warn:      #D97706;
-      --warn-bg:   #FFFBEB;
-      --radius:    10px;
-      --shadow:    0 1px 4px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+      --bg:#F5F6F8; --surface:#FFFFFF; --border:#E2E5EA;
+      --text:#1C1F26; --muted:#6B7280;
+      --accent:#2563EB; --accent-dk:#1D4ED8;
+      --success:#16A34A; --success-bg:#F0FDF4;
+      --error:#DC2626; --error-bg:#FEF2F2;
+      --warn:#D97706; --warn-bg:#FFFBEB;
+      --radius:10px; --shadow:0 1px 4px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--text);
-      min-height: 100vh; padding: 24px 16px 48px;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px 16px 48px}
+    .wrap{max-width:580px;margin:0 auto}
+    header{margin-bottom:28px}
+    .eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+    header h1{font-size:26px;font-weight:700;letter-spacing:-.4px}
+    header p{margin-top:6px;font-size:14px;color:var(--muted);line-height:1.5}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 24px;margin-bottom:12px}
+    .section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+    .tile{display:flex;flex-direction:column;align-items:flex-start;padding:18px 16px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;text-align:left;width:100%}
+    .tile:hover{border-color:var(--accent);background:#F0F5FF}
+    .tile.active{border-color:var(--accent);background:#EEF4FF}
+    .tile .icon{font-size:22px;margin-bottom:8px}
+    .tile .label{font-size:14px;font-weight:600;color:var(--text)}
+    .tile .desc{font-size:12px;color:var(--muted);margin-top:3px}
+    .tile.sm{padding:12px 14px;flex-direction:row;align-items:center;gap:12px}
+    .tile.sm .icon{font-size:18px;margin:0}
+    .tile.sm .label{font-size:13px}
+    .tile.sm .desc{display:none}
+    .field{margin-bottom:18px}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+    label{display:block;font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px}
+    label .opt{color:var(--muted);font-weight:400;font-size:11px;margin-left:4px}
+    label .req{color:var(--error);margin-left:2px}
+    select,input[type=text],input[type=date],input[type=password]{width:100%;padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:7px;outline:none;transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none}
+    select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+    select:disabled,input:disabled{background:var(--bg);color:var(--muted);cursor:not-allowed}
+    .select-wrap{position:relative}
+    .select-wrap::after{content:'';position:absolute;right:13px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--muted);pointer-events:none}
+    .hint{font-size:12px;color:var(--muted);margin-top:4px}
+    hr.div{border:none;border-top:1px solid var(--border);margin:20px 0}
+    .btn{width:100%;padding:12px;font-size:15px;font-weight:600;font-family:inherit;color:#fff;background:var(--accent);border:none;border-radius:8px;cursor:pointer;transition:background .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .btn:hover:not(:disabled){background:var(--accent-dk)}
+    .btn:active:not(:disabled){transform:scale(.99)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn.danger{background:var(--error)}.btn.danger:hover:not(:disabled){background:#B91C1C}
+    .btn.ghost{background:var(--muted)}
+    .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .banner{border-radius:8px;padding:14px 16px;font-size:14px;line-height:1.5;margin-top:16px;display:none}
+    .banner.show{display:block}
+    .banner strong{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+    .banner.success{background:var(--success-bg);color:var(--success);border:1px solid #BBF7D0}
+    .banner.error{background:var(--error-bg);color:var(--error);border:1px solid #FECACA}
+    .banner.warn{background:var(--warn-bg);color:var(--warn);border:1px solid #FDE68A}
+    #avail-strip{font-size:13px;margin-top:8px;min-height:20px;color:var(--muted)}
+    #avail-strip.free{color:var(--success)}
+    #avail-strip.busy{color:var(--error)}
+    .skel{background:linear-gradient(90deg,#E9EAEC 25%,#F3F4F6 50%,#E9EAEC 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:6px;height:40px}
+    @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+    table.t{width:100%;border-collapse:collapse;font-size:13px}
+    table.t th{background:var(--bg);padding:10px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+    table.t td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
+    table.t tr:last-child td{border-bottom:none}
+    table.t tr:hover td{background:var(--bg)}
+    .empty{padding:28px;text-align:center;color:var(--muted);font-size:13px}
+    .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:12px}
+    .badge.taken{background:#FEF3C7;color:#92400E}
+    .badge.returned{background:var(--success-bg);color:var(--success)}
+    .badge.avail{background:#EEF4FF;color:var(--accent)}
+    /* photo upload */
+    .photo-drop{border:2px dashed var(--border);border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;position:relative}
+    .photo-drop:hover,.photo-drop.over{border-color:var(--accent);background:#F0F5FF}
+    .photo-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .photo-drop .ph-label{font-size:13px;color:var(--muted)}
+    .photo-drop .ph-label strong{color:var(--accent)}
+    .photo-preview{max-width:100%;max-height:180px;border-radius:6px;margin-top:10px;display:none}
+    /* card header */
+    .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .back{background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit}
+    .back:hover{color:var(--text)}
+    /* overlay/modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+    .overlay.show{display:flex}
+    .dialog{background:var(--surface);border-radius:var(--radius);padding:28px 24px;max-width:400px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+    .dialog h3{font-size:16px;font-weight:600;margin-bottom:6px}
+    .dialog p{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px}
+    .tok-remember{display:flex;align-items:center;gap:8px;margin:12px 0 20px;font-size:13px;color:var(--muted);cursor:pointer}
+    .tok-remember input[type=checkbox]{width:auto;accent-color:var(--accent)}
+    .tok-status{font-size:12px;color:var(--muted);margin-top:8px}
+    .tok-status.saved{color:var(--success)}
+    /* photo viewer modal */
+    #photo-modal img{max-width:100%;border-radius:8px;margin-top:12px}
+    .hidden{display:none!important}
+    @media(max-width:420px){
+      .card{padding:20px 16px}
+      .field-row,.grid-2,.btn-row{grid-template-columns:1fr}
+      header h1{font-size:22px}
     }
-    .wrap { max-width: 560px; margin: 0 auto; }
-
-    header { margin-bottom: 28px; }
-    .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
-    header h1 { font-size: 26px; font-weight: 700; letter-spacing: -.4px; color: var(--text); }
-    header p { margin-top: 6px; font-size: 14px; color: var(--muted); line-height: 1.5; }
-
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 24px; margin-bottom: 12px; }
-
-    .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
-    .mode-btn {
-      display: flex; flex-direction: column; align-items: flex-start;
-      padding: 14px 16px; border: 1.5px solid var(--border); border-radius: 8px;
-      background: var(--surface); cursor: pointer; font-family: inherit;
-      transition: border-color .15s, background .15s; text-align: left;
-    }
-    .mode-btn:hover { border-color: var(--accent); background: #F0F5FF; }
-    .mode-btn.active { border-color: var(--accent); background: #EEF4FF; }
-    .mode-btn .icon { font-size: 20px; margin-bottom: 6px; }
-    .mode-btn .label { font-size: 13px; font-weight: 600; color: var(--text); }
-    .mode-btn .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-    .section-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-
-    .field { margin-bottom: 18px; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
-    label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
-    label .req { color: var(--error); margin-left: 2px; }
-    label .opt { color: var(--muted); font-weight: 400; font-size: 11px; margin-left: 4px; }
-    select, input[type="text"], input[type="date"], input[type="password"] {
-      width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit;
-      color: var(--text); background: var(--surface); border: 1px solid var(--border);
-      border-radius: 7px; outline: none; transition: border-color .15s, box-shadow .15s;
-      appearance: none; -webkit-appearance: none;
-    }
-    select:focus, input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
-    select:disabled, input:disabled { background: var(--bg); color: var(--muted); cursor: not-allowed; }
-    .select-wrap { position: relative; }
-    .select-wrap::after {
-      content: ''; position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
-      width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;
-      border-top: 5px solid var(--muted); pointer-events: none;
-    }
-    .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
-    hr.divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
-
-    .btn {
-      width: 100%; padding: 12px; font-size: 15px; font-weight: 600; font-family: inherit;
-      color: #fff; background: var(--accent); border: none; border-radius: 8px;
-      cursor: pointer; transition: background .15s, transform .1s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn:hover:not(:disabled) { background: var(--accent-dk); }
-    .btn:active:not(:disabled) { transform: scale(.99); }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn.danger { background: var(--error); }
-    .btn.danger:hover:not(:disabled) { background: #B91C1C; }
-    .btn.ghost { background: var(--muted); }
-    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .banner { border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.5; margin-top: 16px; display: none; }
-    .banner.show { display: block; }
-    .banner strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-    .banner.success { background: var(--success-bg); color: var(--success); border: 1px solid #BBF7D0; }
-    .banner.conflict { background: var(--error-bg); color: var(--error); border: 1px solid #FECACA; }
-    .banner.warn { background: var(--warn-bg); color: var(--warn); border: 1px solid #FDE68A; }
-
-    #avail-strip { font-size: 13px; margin-top: 8px; min-height: 20px; color: var(--muted); }
-    #avail-strip.free { color: var(--success); }
-    #avail-strip.busy { color: var(--error); }
-
-    .skeleton { background: linear-gradient(90deg, #E9EAEC 25%, #F3F4F6 50%, #E9EAEC 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; height: 40px; }
-    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
-
-    .res-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .res-table th { background: var(--bg); padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
-    .res-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
-    .res-table tr:last-child td { border-bottom: none; }
-    .res-table tr:hover td { background: var(--bg); }
-    .empty-state { padding: 28px; text-align: center; color: var(--muted); font-size: 13px; }
-
-    /* Token modal */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
-    .overlay.show { display: flex; }
-    .dialog { background: var(--surface); border-radius: var(--radius); padding: 28px 24px; max-width: 400px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
-    .dialog h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-    .dialog p { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
-    .token-remember { display: flex; align-items: center; gap: 8px; margin: 12px 0 20px; font-size: 13px; color: var(--muted); cursor: pointer; }
-    .token-remember input[type="checkbox"] { width: auto; accent-color: var(--accent); }
-    .token-status { font-size: 12px; color: var(--muted); margin-top: 8px; }
-    .token-status.saved { color: var(--success); }
-
-    .back-btn { background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer; font-family: inherit; }
-    .back-btn:hover { color: var(--text); }
-    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-
-    @media (max-width: 420px) {
-      .card { padding: 20px 16px; }
-      .field-row, .mode-grid, .btn-row { grid-template-columns: 1fr; }
-      header h1 { font-size: 22px; }
-    }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="eyebrow">Internal tool</div>
-    <h1>Inventory reservations</h1>
-    <p>Check availability and manage item bookings.</p>
+    <h1>Inventory</h1>
+    <p>Reservations, borrowing and returns.</p>
   </header>
 
   <!-- Loading -->
   <div class="card" id="loading-card">
-    <div class="skeleton" style="margin-bottom:12px"></div>
-    <div class="skeleton" style="margin-bottom:12px"></div>
-    <div class="skeleton" style="height:24px;width:60%"></div>
+    <div class="skel" style="margin-bottom:12px"></div>
+    <div class="skel" style="margin-bottom:12px"></div>
+    <div class="skel" style="height:24px;width:60%"></div>
   </div>
 
-  <!-- Mode selector -->
-  <div class="card hidden" id="mode-card">
+  <!-- Home: two top-level tiles -->
+  <div class="card hidden" id="home-card">
     <div class="section-label">What would you like to do?</div>
-    <div class="mode-grid">
-      <button class="mode-btn" data-mode="add">
-        <span class="icon">➕</span>
-        <span class="label">Add reservation</span>
-        <span class="desc">Reserve an available item</span>
-      </button>
-      <button class="mode-btn" data-mode="view">
+    <div class="grid-2">
+      <button class="tile" data-go="res-menu">
         <span class="icon">📋</span>
-        <span class="label">View reservations</span>
-        <span class="desc">See all current bookings</span>
+        <span class="label">Reservations</span>
+        <span class="desc">Add, view, modify or delete bookings</span>
       </button>
-      <button class="mode-btn" data-mode="modify">
-        <span class="icon">✏️</span>
-        <span class="label">Modify reservation</span>
-        <span class="desc">Change dates or name</span>
-      </button>
-      <button class="mode-btn" data-mode="delete">
-        <span class="icon">🗑️</span>
-        <span class="label">Delete reservation</span>
-        <span class="desc">Cancel a booking</span>
+      <button class="tile" data-go="borrow-menu">
+        <span class="icon">🔑</span>
+        <span class="label">Borrow / Return</span>
+        <span class="desc">Take or return an inventory item</span>
       </button>
     </div>
   </div>
 
-  <!-- ADD -->
-  <div class="card hidden" id="add-card">
-    <div class="card-header">
+  <!-- Reservations sub-menu -->
+  <div class="card hidden" id="res-menu-card">
+    <div class="ch">
+      <div class="section-label" style="margin:0;border:none;padding:0">Reservations</div>
+      <button class="back" onclick="goHome()">← Home</button>
+    </div>
+    <div class="grid-2">
+      <button class="tile sm" data-go="add-res"><span class="icon">➕</span><span class="label">Add reservation</span></button>
+      <button class="tile sm" data-go="view-res"><span class="icon">📄</span><span class="label">View all</span></button>
+      <button class="tile sm" data-go="mod-res"><span class="icon">✏️</span><span class="label">Modify</span></button>
+      <button class="tile sm" data-go="del-res"><span class="icon">🗑️</span><span class="label">Delete</span></button>
+    </div>
+  </div>
+
+  <!-- Borrow/Return sub-menu -->
+  <div class="card hidden" id="borrow-menu-card">
+    <div class="ch">
+      <div class="section-label" style="margin:0;border:none;padding:0">Borrow / Return</div>
+      <button class="back" onclick="goHome()">← Home</button>
+    </div>
+    <div class="grid-2">
+      <button class="tile" data-go="take">
+        <span class="icon">📦</span>
+        <span class="label">Take an item</span>
+        <span class="desc">Check out against your reservation</span>
+      </button>
+      <button class="tile" data-go="return">
+        <span class="icon">↩️</span>
+        <span class="label">Return an item</span>
+        <span class="desc">Hand back a borrowed item</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ADD RESERVATION -->
+  <div class="card hidden" id="add-res-card">
+    <div class="ch">
       <div class="section-label" style="margin:0;border:none;padding:0">New reservation</div>
-      <button class="back-btn" onclick="goHome()">← Back</button>
+      <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
     <form id="res-form" novalidate>
       <div class="field">
-        <label for="category">Category <span class="req">*</span></label>
-        <div class="select-wrap">
-          <select id="category" required>
-            <option value="">Select a category…</option>
-          </select>
-        </div>
+        <label for="r-cat">Category <span class="req">*</span></label>
+        <div class="select-wrap"><select id="r-cat" required><option value="">Select a category…</option></select></div>
       </div>
       <div class="field">
-        <label for="item">Item <span class="req">*</span></label>
-        <div class="select-wrap">
-          <select id="item" required disabled>
-            <option value="">Select an item…</option>
-          </select>
-        </div>
+        <label for="r-item">Item <span class="req">*</span></label>
+        <div class="select-wrap"><select id="r-item" required disabled><option value="">Select an item…</option></select></div>
         <div id="avail-strip"></div>
       </div>
-
-      <!-- Model number — optional, auto-filled from CSV but editable -->
-      <div class="field" id="model-field" style="display:none">
-        <label for="model-number">Model / ID number <span class="opt">(optional)</span></label>
-        <input type="text" id="model-number" placeholder="e.g. PJ-2041" autocomplete="off" />
-        <div class="hint">Pre-filled from inventory. Edit if needed or leave blank.</div>
+      <div class="field hidden" id="r-model-field">
+        <label for="r-model">Model / ID <span class="opt">(optional)</span></label>
+        <input type="text" id="r-model" placeholder="e.g. PJ-2041"/>
+        <div class="hint">Pre-filled from inventory. Edit if needed.</div>
       </div>
-
-      <hr class="divider" />
+      <hr class="div"/>
       <div class="field-row">
-        <div>
-          <label for="start-date">From <span class="req">*</span></label>
-          <input type="date" id="start-date" required />
-        </div>
-        <div>
-          <label for="end-date">To <span class="req">*</span></label>
-          <input type="date" id="end-date" required />
-        </div>
+        <div><label for="r-start">From <span class="req">*</span></label><input type="date" id="r-start" required/></div>
+        <div><label for="r-end">To <span class="req">*</span></label><input type="date" id="r-end" required/></div>
       </div>
       <div class="hint" style="margin-top:-10px;margin-bottom:18px">Both dates inclusive.</div>
-      <hr class="divider" />
+      <hr class="div"/>
       <div class="field">
-        <label for="name">Your name <span class="req">*</span></label>
-        <input type="text" id="name" placeholder="e.g. Sarah Chen" required autocomplete="name" />
+        <label for="r-name">Your name <span class="req">*</span></label>
+        <input type="text" id="r-name" placeholder="e.g. Sarah Chen" required autocomplete="name"/>
       </div>
-      <button type="submit" class="btn" id="submit-btn" disabled>Reserve item</button>
-      <div class="banner" id="add-banner"></div>
+      <button type="submit" class="btn" id="r-submit" disabled>Reserve item</button>
+      <div class="banner" id="r-banner"></div>
     </form>
   </div>
 
-  <!-- VIEW -->
-  <div class="card hidden" id="view-card">
-    <div class="card-header">
+  <!-- VIEW RESERVATIONS -->
+  <div class="card hidden" id="view-res-card">
+    <div class="ch">
       <div class="section-label" style="margin:0;border:none;padding:0">All reservations</div>
-      <button class="back-btn" onclick="goHome()">← Back</button>
+      <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
-    <div id="view-table-wrap"></div>
+    <div id="view-res-body"></div>
   </div>
 
-  <!-- MODIFY -->
-  <div class="card hidden" id="modify-card">
-    <div class="card-header">
+  <!-- MODIFY RESERVATION -->
+  <div class="card hidden" id="mod-res-card">
+    <div class="ch">
       <div class="section-label" style="margin:0;border:none;padding:0">Modify reservation</div>
-      <button class="back-btn" onclick="goHome()">← Back</button>
+      <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
     <div class="field">
-      <label for="modify-select">Select reservation</label>
-      <div class="select-wrap">
-        <select id="modify-select"><option value="">Choose a reservation…</option></select>
-      </div>
+      <label for="mod-sel">Select reservation</label>
+      <div class="select-wrap"><select id="mod-sel"><option value="">Choose…</option></select></div>
     </div>
-    <div id="modify-fields" class="hidden">
-      <hr class="divider" />
+    <div id="mod-fields" class="hidden">
+      <hr class="div"/>
       <div class="field-row">
-        <div>
-          <label for="modify-start">New start date</label>
-          <input type="date" id="modify-start" />
-        </div>
-        <div>
-          <label for="modify-end">New end date</label>
-          <input type="date" id="modify-end" />
-        </div>
+        <div><label for="mod-start">New start</label><input type="date" id="mod-start"/></div>
+        <div><label for="mod-end">New end</label><input type="date" id="mod-end"/></div>
+      </div>
+      <div class="field"><label for="mod-name">Name</label><input type="text" id="mod-name"/></div>
+      <button class="btn" id="mod-btn">Save changes</button>
+      <div class="banner" id="mod-banner"></div>
+    </div>
+  </div>
+
+  <!-- DELETE RESERVATION -->
+  <div class="card hidden" id="del-res-card">
+    <div class="ch">
+      <div class="section-label" style="margin:0;border:none;padding:0">Delete reservation</div>
+      <button class="back" onclick="goSection('res-menu')">← Back</button>
+    </div>
+    <div class="field">
+      <label for="del-sel">Select reservation</label>
+      <div class="select-wrap"><select id="del-sel"><option value="">Choose…</option></select></div>
+    </div>
+    <div id="del-preview" class="hidden">
+      <div class="banner warn show" id="del-warn"></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn danger" id="del-confirm">Yes, delete it</button>
+        <button class="btn ghost" onclick="goSection('res-menu')">Never mind</button>
+      </div>
+      <div class="banner" id="del-banner"></div>
+    </div>
+  </div>
+
+  <!-- TAKE AN ITEM -->
+  <div class="card hidden" id="take-card">
+    <div class="ch">
+      <div class="section-label" style="margin:0;border:none;padding:0">Take an item</div>
+      <button class="back" onclick="goSection('borrow-menu')">← Back</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Select your active reservation below. The item will be marked as taken.</p>
+    <div class="field">
+      <label for="take-sel">Your reservation <span class="req">*</span></label>
+      <div class="select-wrap"><select id="take-sel"><option value="">Loading…</option></select></div>
+    </div>
+    <div id="take-detail" class="hidden">
+      <div class="banner warn show" id="take-info"></div>
+      <button class="btn" id="take-btn" style="margin-top:12px">Confirm — I'm taking this item</button>
+      <div class="banner" id="take-banner"></div>
+    </div>
+  </div>
+
+  <!-- RETURN AN ITEM -->
+  <div class="card hidden" id="return-card">
+    <div class="ch">
+      <div class="section-label" style="margin:0;border:none;padding:0">Return an item</div>
+      <button class="back" onclick="goSection('borrow-menu')">← Back</button>
+    </div>
+    <div class="field">
+      <label for="ret-sel">Select item being returned <span class="req">*</span></label>
+      <div class="select-wrap"><select id="ret-sel"><option value="">Loading…</option></select></div>
+    </div>
+    <div id="ret-fields" class="hidden">
+      <hr class="div"/>
+      <div class="field">
+        <label for="ret-by">Returned by <span class="req">*</span></label>
+        <input type="text" id="ret-by" placeholder="Your name"/>
       </div>
       <div class="field">
-        <label for="modify-name">Name</label>
-        <input type="text" id="modify-name" />
+        <label for="ret-behalf">On behalf of <span class="opt">(optional — if returning for someone else)</span></label>
+        <input type="text" id="ret-behalf" placeholder="Name of person who borrowed it"/>
       </div>
-      <button class="btn" id="modify-btn">Save changes</button>
-      <div class="banner" id="modify-banner"></div>
-    </div>
-  </div>
-
-  <!-- DELETE -->
-  <div class="card hidden" id="delete-card">
-    <div class="card-header">
-      <div class="section-label" style="margin:0;border:none;padding:0">Delete reservation</div>
-      <button class="back-btn" onclick="goHome()">← Back</button>
-    </div>
-    <div class="field">
-      <label for="delete-select">Select reservation to cancel</label>
-      <div class="select-wrap">
-        <select id="delete-select"><option value="">Choose a reservation…</option></select>
+      <hr class="div"/>
+      <div class="field">
+        <label>Condition photo <span class="opt">(optional)</span></label>
+        <div class="photo-drop" id="photo-drop">
+          <input type="file" id="photo-input" accept="image/*" capture="environment"/>
+          <div class="ph-label">📷 <strong>Tap to take or upload a photo</strong><br>JPEG or PNG · compressed automatically</div>
+          <img class="photo-preview" id="photo-preview" alt="Preview"/>
+        </div>
+        <div class="hint" id="photo-hint"></div>
       </div>
-    </div>
-    <div id="delete-preview" class="hidden" style="margin-top:16px">
-      <div class="banner warn show" id="delete-warn"></div>
-      <div class="btn-row" style="margin-top:12px">
-        <button class="btn danger" id="confirm-delete-btn">Yes, cancel it</button>
-        <button class="btn ghost" onclick="goHome()">Never mind</button>
-      </div>
-      <div class="banner" id="delete-banner"></div>
+      <button class="btn" id="ret-btn">Confirm return</button>
+      <div class="banner" id="ret-banner"></div>
     </div>
   </div>
 </div>
 
-<!-- Token modal — shown only when a write action is attempted -->
-<div class="overlay" id="token-overlay">
+<!-- Token modal -->
+<div class="overlay" id="tok-overlay">
   <div class="dialog">
     <h3>Access required</h3>
-    <p>Enter the access token to save changes. This is shared internally with your team.</p>
+    <p>Enter the access token to save changes.</p>
     <div class="field">
-      <label for="token-input">Access token</label>
-      <input type="password" id="token-input" placeholder="github_pat_…" autocomplete="off" />
+      <label for="tok-input">Access token</label>
+      <input type="password" id="tok-input" placeholder="github_pat_…" autocomplete="off"/>
     </div>
-    <label class="token-remember">
-      <input type="checkbox" id="token-remember" checked />
-      Remember on this device
-    </label>
+    <label class="tok-remember"><input type="checkbox" id="tok-remember" checked/> Remember on this device</label>
     <div class="btn-row">
-      <button class="btn" id="token-confirm-btn">Continue</button>
-      <button class="btn ghost" onclick="closeTokenModal()">Cancel</button>
+      <button class="btn" id="tok-confirm">Continue</button>
+      <button class="btn ghost" onclick="closeTok()">Cancel</button>
     </div>
-    <div class="token-status" id="token-status"></div>
+    <div class="tok-status" id="tok-status"></div>
+  </div>
+</div>
+
+<!-- Photo viewer modal -->
+<div class="overlay" id="photo-modal">
+  <div class="dialog" id="photo-modal-inner" style="max-width:500px">
+    <div class="ch"><h3>Return photo</h3><button class="back" onclick="closePhotoModal()">✕ Close</button></div>
+    <img id="photo-modal-img" src="" alt="Return photo" style="max-width:100%;border-radius:8px"/>
   </div>
 </div>
 
 <script>
 // ── Config ────────────────────────────────────────────────────────────────
-const OWNER  = 'pollats';
-const REPO   = 'inventory_tracker';
-const BRANCH = 'main';
-const RES_HEADERS = ['Category','Item Name','ID / Model Number','Reserved By','Start Date','End Date','Timestamp'];
-const TOKEN_KEY = 'inv_gh_token';
+const OWNER = 'pollats', REPO = 'inventory_tracker', BRANCH = 'main';
+const TOK_KEY = 'inv_gh_token';
+const RES_HDR = ['Category','Item Name','ID / Model Number','Reserved By','Start Date','End Date','Timestamp'];
+const CHK_HDR = ['Item Name','ID / Model Number','Reservation ID','Taken By','Taken Timestamp','Returned By','On Behalf Of','Return Timestamp','Photo Path','Status'];
+const ITM_HDR = ['Category','Item Name','ID / Model Number','Total Units','Units Available'];
 
-// ── Token management ──────────────────────────────────────────────────────
-// Token is stored in localStorage (persists across sessions) if user opts in.
-// It is never in the source code.
-// It is only requested when a write action is triggered.
-
-function getSavedToken() {
-  return localStorage.getItem(TOKEN_KEY) || '';
-}
-
-function saveToken(t, remember) {
-  if (remember) {
-    localStorage.setItem(TOKEN_KEY, t);
-  } else {
-    localStorage.removeItem(TOKEN_KEY);
-    sessionStorage.setItem(TOKEN_KEY, t); // session-only fallback
-  }
-}
-
-function getActiveToken() {
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
-}
-
-// Pending action to run after token is confirmed
+// ── Token ─────────────────────────────────────────────────────────────────
 let pendingAction = null;
+const getSaved = () => localStorage.getItem(TOK_KEY) || '';
+const getActive = () => localStorage.getItem(TOK_KEY) || sessionStorage.getItem(TOK_KEY) || '';
+
+function saveTok(t, remember) {
+  if (remember) localStorage.setItem(TOK_KEY, t);
+  else { localStorage.removeItem(TOK_KEY); sessionStorage.setItem(TOK_KEY, t); }
+}
 
 function requireToken(action) {
-  const existing = getActiveToken();
-  if (existing) {
-    action(existing);
-    return;
-  }
-  // Pre-fill if something is in storage
-  document.getElementById('token-input').value = getSavedToken();
-  updateTokenStatus();
+  const t = getActive();
+  if (t) { action(t); return; }
+  document.getElementById('tok-input').value = getSaved();
+  updateTokStatus();
   pendingAction = action;
-  document.getElementById('token-overlay').classList.add('show');
-  setTimeout(() => document.getElementById('token-input').focus(), 100);
+  document.getElementById('tok-overlay').classList.add('show');
+  setTimeout(() => document.getElementById('tok-input').focus(), 100);
 }
 
-function closeTokenModal() {
-  document.getElementById('token-overlay').classList.remove('show');
-  pendingAction = null;
+function closeTok() { document.getElementById('tok-overlay').classList.remove('show'); pendingAction = null; }
+
+function updateTokStatus() {
+  const el = document.getElementById('tok-status');
+  const s = getSaved();
+  el.textContent = s ? '✓ A token is saved on this device.' : '';
+  el.className = 'tok-status' + (s ? ' saved' : '');
 }
 
-function updateTokenStatus() {
-  const saved = getSavedToken();
-  const el = document.getElementById('token-status');
-  if (saved) {
-    el.textContent = '✓ A token is saved on this device.';
-    el.className = 'token-status saved';
-  } else {
-    el.textContent = '';
-    el.className = 'token-status';
-  }
-}
-
-document.getElementById('token-confirm-btn').addEventListener('click', () => {
-  const t = document.getElementById('token-input').value.trim();
-  if (!t) { document.getElementById('token-status').textContent = 'Please enter a token.'; return; }
-  const remember = document.getElementById('token-remember').checked;
-  saveToken(t, remember);
-  document.getElementById('token-overlay').classList.remove('show');
-  if (pendingAction) {
-    const action = pendingAction;
-    pendingAction = null;
-    action(t);
-  }
+document.getElementById('tok-confirm').addEventListener('click', () => {
+  const t = document.getElementById('tok-input').value.trim();
+  if (!t) { document.getElementById('tok-status').textContent = 'Please enter a token.'; return; }
+  saveTok(t, document.getElementById('tok-remember').checked);
+  closeTok();
+  if (pendingAction) { const a = pendingAction; pendingAction = null; a(t); }
 });
+document.getElementById('tok-input').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('tok-confirm').click(); });
 
-document.getElementById('token-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('token-confirm-btn').click();
-});
+// ── GitHub ────────────────────────────────────────────────────────────────
+const API = f => `https://api.github.com/repos/${OWNER}/${REPO}/contents/${f}`;
 
-// ── GitHub helpers ────────────────────────────────────────────────────────
-const API = (file) => `https://api.github.com/repos/${OWNER}/${REPO}/contents/data/${file}`;
-
-function ghHeaders(token) {
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Accept': 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28'
-  };
+function ghH(tok) {
+  return { 'Authorization': `Bearer ${tok}`, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
 }
 
-// Read — no token needed for public repos (raw URL is fine for reads since
-// we use the API endpoint to bypass cache, but public repos don't need auth)
-async function readCSV(filename) {
-  const token = getActiveToken();
-  const headers = token ? ghHeaders(token) : { 'Accept': 'application/vnd.github+json' };
-  const res = await fetch(API(filename), { headers });
-  if (!res.ok) throw new Error(`Could not read ${filename}`);
-  const json = await res.json();
-  const text = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ''))));
-  return parseCSV(text);
+async function readCSV(path) {
+  const tok = getActive();
+  const h = tok ? ghH(tok) : { 'Accept': 'application/vnd.github+json' };
+  const res = await fetch(API(`data/${path}`), { headers: h });
+  if (!res.ok) throw new Error(`Read failed: ${path}`);
+  const j = await res.json();
+  return parseCSV(atob(j.content.replace(/\n/g, '')));
 }
 
-// Write — always needs token
-async function writeCSV(filename, headers, rows, token) {
-  const metaRes = await fetch(API(filename), { headers: ghHeaders(token) });
-  if (!metaRes.ok) throw new Error('Could not fetch file metadata');
-  const meta = await metaRes.json();
+async function writeCSV(path, headers, rows, tok) {
+  const url = API(`data/${path}`);
+  const meta = await (await fetch(url, { headers: ghH(tok) })).json();
   const sha = meta.sha;
-
   const content = toCSV(headers, rows);
   const b64 = btoa(unescape(encodeURIComponent(content)));
-
-  const res = await fetch(API(filename), {
-    method: 'PUT',
-    headers: { ...ghHeaders(token), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: `Reservation update — ${new Date().toISOString()}`, content: b64, sha })
+  const res = await fetch(url, {
+    method: 'PUT', headers: { ...ghH(tok), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: `Update ${path} — ${new Date().toISOString()}`, content: b64, sha })
   });
   if (!res.ok) {
-    const err = await res.json();
-    // If 401, clear saved token so user is prompted again
-    if (res.status === 401) {
-      localStorage.removeItem(TOKEN_KEY);
-      sessionStorage.removeItem(TOKEN_KEY);
-    }
-    throw new Error(err.message || 'Write failed');
+    const e = await res.json();
+    if (res.status === 401) { localStorage.removeItem(TOK_KEY); sessionStorage.removeItem(TOK_KEY); }
+    throw new Error(e.message || 'Write failed');
   }
-  return res.json();
+}
+
+async function writeFile(path, b64content, tok) {
+  const url = API(path);
+  let sha = null;
+  try { const m = await (await fetch(url, { headers: ghH(tok) })).json(); sha = m.sha; } catch {}
+  const body = { message: `Add ${path}`, content: b64content };
+  if (sha) body.sha = sha;
+  const res = await fetch(url, {
+    method: 'PUT', headers: { ...ghH(tok), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('Photo upload failed');
+}
+
+async function readFile(path) {
+  const tok = getActive();
+  const h = tok ? ghH(tok) : { 'Accept': 'application/vnd.github+json' };
+  const res = await fetch(API(path), { headers: h });
+  if (!res.ok) throw new Error('Could not read file');
+  const j = await res.json();
+  return j.content.replace(/\n/g, '');
 }
 
 // ── CSV helpers ───────────────────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split('\n').filter(l => l.trim());
   if (!lines.length) return [];
-  const headers = lines[0].split(',').map(h => h.trim());
+  const hdrs = lines[0].split(',').map(h => h.trim());
   return lines.slice(1).map(line => {
     const vals = line.split(',').map(v => v.trim());
-    return Object.fromEntries(headers.map((h, i) => [h, vals[i] ?? '']));
+    return Object.fromEntries(hdrs.map((h, i) => [h, vals[i] ?? '']));
   });
 }
 function toCSV(headers, rows) {
-  return [headers.join(','), ...rows.map(r => headers.map(h => r[h] ?? '').join(','))].join('\n');
+  return [headers.join(','), ...rows.map(r => headers.map(h => (r[h] ?? '').toString().replace(/,/g,'；')).join(','))].join('\n');
 }
+
+// ── Date helpers ──────────────────────────────────────────────────────────
+const today = () => new Date().toISOString().split('T')[0];
+const fmt = d => { if (!d) return ''; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y}`; };
+const overlaps = (es,ee,rs,re) => es <= re && ee >= rs;
+const tsNow = () => new Date().toISOString();
+const resID = () => 'R' + Date.now();
+
+// ── Availability ──────────────────────────────────────────────────────────
+// Available = Units Available (already reflects physical stock) minus
+// active reservations (not yet taken) overlapping the requested period
+// minus active checkouts (taken, not returned) — those already reduced Units Available
+function calcAvailable(item, startDate, endDate, reservations, checkouts) {
+  const iName = item['Item Name'];
+  const totalAvail = parseInt(item['Units Available']) || 0;
+
+  // Count reservations overlapping this period (excluding ones already taken — those are in checkouts)
+  const takenResIDs = new Set(checkouts.filter(c => c['Item Name'] === iName && c['Status'] === 'taken').map(c => c['Reservation ID']));
+  const overlapRes = reservations.filter(r =>
+    r['Item Name'] === iName &&
+    overlaps(r['Start Date'], r['End Date'], startDate, endDate) &&
+    !takenResIDs.has(r['_id'])
+  ).length;
+
+  return totalAvail - overlapRes;
+}
+
+// ── Image compression + base64 ────────────────────────────────────────────
+function compressImage(file, maxW = 1200, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(blob => {
+          const fr = new FileReader();
+          fr.onload = ev => resolve(ev.target.result.split(',')[1]); // base64 only
+          fr.onerror = reject;
+          fr.readAsDataURL(blob);
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+const cards = {
+  'home':'home-card','res-menu':'res-menu-card','borrow-menu':'borrow-menu-card',
+  'add-res':'add-res-card','view-res':'view-res-card','mod-res':'mod-res-card','del-res':'del-res-card',
+  'take':'take-card','return':'return-card'
+};
+
+function showOnly(key) {
+  Object.values(cards).forEach(id => document.getElementById(id).classList.add('hidden'));
+  if (cards[key]) document.getElementById(cards[key]).classList.remove('hidden');
+}
+
+function goHome() { showOnly('home'); }
+
+function goSection(key) {
+  showOnly(key);
+  if (key === 'view-res') openViewRes();
+  if (key === 'mod-res')  openModRes();
+  if (key === 'del-res')  openDelRes();
+  if (key === 'take')     openTake();
+  if (key === 'return')   openReturn();
+}
+
+document.querySelectorAll('[data-go]').forEach(el => {
+  el.addEventListener('click', () => goSection(el.dataset.go));
+});
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function showBanner(id, type, title, body) { const el=$(id); el.className=`banner show ${type}`; el.innerHTML=`<strong>${title}</strong>${body}`; }
+function hideBanner(id) { const el=$(id); el.className='banner'; el.innerHTML=''; }
+function setLoading(id, yes, label) { const b=$(id); b.disabled=yes; b.innerHTML=yes?'<div class="spinner"></div> Working…':label; }
+function setAvail(text, cls) { const el=$('avail-strip'); el.textContent=text; el.className=cls||''; }
 
 // ── State ─────────────────────────────────────────────────────────────────
 let allItems = [];
 
-// ── Date helpers ──────────────────────────────────────────────────────────
-function today() { return new Date().toISOString().split('T')[0]; }
-function fmt(d) { if (!d) return ''; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y}`; }
-function overlaps(es, ee, rs, re) { return es <= re && ee >= rs; }
-function findConflict(reservations, itemName, startDate, endDate, excludeIdx = -1) {
-  return reservations.find((r, i) =>
-    i !== excludeIdx &&
-    r['Item Name'] === itemName &&
-    overlaps(r['Start Date'], r['End Date'], startDate, endDate)
-  ) || null;
+// ── ADD RESERVATION ───────────────────────────────────────────────────────
+function openAddRes() {
+  resetResForm();
+  populateCats();
 }
 
-// ── UI helpers ────────────────────────────────────────────────────────────
-function show(id) { document.getElementById(id).classList.remove('hidden'); }
-function hide(id) { document.getElementById(id).classList.add('hidden'); }
-function showBanner(id, type, title, body) {
-  const el = document.getElementById(id);
-  el.className = `banner show ${type}`;
-  el.innerHTML = `<strong>${title}</strong>${body}`;
-}
-function hideBanner(id) { const el = document.getElementById(id); el.className = 'banner'; el.innerHTML = ''; }
-
-function goHome() {
-  ['add-card','view-card','modify-card','delete-card'].forEach(hide);
-  show('mode-card');
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+function resetResForm() {
+  $('r-cat').value=''; $('r-item').innerHTML='<option value="">Select an item…</option>'; $('r-item').disabled=true;
+  $('r-model').value=''; $('r-model-field').classList.add('hidden');
+  $('r-start').value=today(); $('r-start').min=today();
+  $('r-end').value=''; $('r-end').min=today();
+  $('r-name').value=''; setAvail(''); hideBanner('r-banner'); updateResSubmit();
 }
 
-function setLoading(btnId, yes, label) {
-  const btn = document.getElementById(btnId);
-  btn.disabled = yes;
-  btn.innerHTML = yes ? '<div class="spinner"></div> Working…' : label;
+function populateCats() {
+  const cats=[...new Set(allItems.map(i=>i['Category']))].sort();
+  const s=$('r-cat'); s.innerHTML='<option value="">Select a category…</option>';
+  cats.forEach(c=>{const o=document.createElement('option');o.value=o.textContent=c;s.appendChild(o);});
 }
 
-// ── Mode selector ─────────────────────────────────────────────────────────
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    hide('mode-card');
-    const mode = btn.dataset.mode;
-    if (mode === 'add')    openAdd();
-    if (mode === 'view')   openView();
-    if (mode === 'modify') openModify();
-    if (mode === 'delete') openDelete();
+function populateItems(cat) {
+  const s=$('r-item'); s.innerHTML='<option value="">Select an item…</option>';
+  allItems.filter(i=>i['Category']===cat).forEach(item=>{
+    const o=document.createElement('option'); o.value=item['Item Name']; o.textContent=item['Item Name']; s.appendChild(o);
   });
-});
-
-// ── ADD ───────────────────────────────────────────────────────────────────
-function openAdd() {
-  show('add-card');
-  resetAddForm();
-  populateCategories();
+  s.disabled=false; $('r-model-field').classList.add('hidden'); $('r-model').value=''; setAvail('');
 }
 
-function resetAddForm() {
-  document.getElementById('category').value = '';
-  const itemSel = document.getElementById('item');
-  itemSel.innerHTML = '<option value="">Select an item…</option>';
-  itemSel.disabled = true;
-  document.getElementById('model-number').value = '';
-  document.getElementById('model-field').style.display = 'none';
-  document.getElementById('start-date').value = today();
-  document.getElementById('start-date').min = today();
-  document.getElementById('end-date').value = '';
-  document.getElementById('end-date').min = today();
-  document.getElementById('name').value = '';
-  setAvailStrip('');
-  hideBanner('add-banner');
-  updateSubmitState();
+function onItemSel(name) {
+  if (!name) { $('r-model-field').classList.add('hidden'); return; }
+  const item=allItems.find(i=>i['Item Name']===name)||{};
+  $('r-model').value=item['ID / Model Number']||'';
+  $('r-model-field').classList.remove('hidden');
 }
 
-function populateCategories() {
-  const cats = [...new Set(allItems.map(i => i['Category']))].sort();
-  const sel = document.getElementById('category');
-  sel.innerHTML = '<option value="">Select a category…</option>';
-  cats.forEach(c => { const o = document.createElement('option'); o.value = o.textContent = c; sel.appendChild(o); });
+function updateResSubmit() {
+  $('r-submit').disabled=!($('r-cat').value&&$('r-item').value&&$('r-start').value&&$('r-end').value&&$('r-name').value.trim());
 }
 
-function populateItems(category) {
-  const sel = document.getElementById('item');
-  sel.innerHTML = '<option value="">Select an item…</option>';
-  allItems.filter(i => i['Category'] === category).forEach(item => {
-    const o = document.createElement('option');
-    o.value = item['Item Name'];
-    o.textContent = item['Item Name'];
-    sel.appendChild(o);
-  });
-  sel.disabled = false;
-  // Reset model field when category changes
-  document.getElementById('model-number').value = '';
-  document.getElementById('model-field').style.display = 'none';
-  setAvailStrip('');
-}
-
-function onItemSelected(itemName) {
-  if (!itemName) {
-    document.getElementById('model-field').style.display = 'none';
-    document.getElementById('model-number').value = '';
-    return;
-  }
-  // Pre-fill model number from items CSV
-  const itemDetails = allItems.find(i => i['Item Name'] === itemName) || {};
-  const modelField = document.getElementById('model-field');
-  const modelInput = document.getElementById('model-number');
-  modelInput.value = itemDetails['ID / Model Number'] || '';
-  modelField.style.display = 'block';
-}
-
-function setAvailStrip(text, cls) {
-  const el = document.getElementById('avail-strip');
-  el.textContent = text; el.className = cls || '';
-}
-
-function updateSubmitState() {
-  const ok = document.getElementById('category').value &&
-             document.getElementById('item').value &&
-             document.getElementById('start-date').value &&
-             document.getElementById('end-date').value &&
-             document.getElementById('name').value.trim();
-  document.getElementById('submit-btn').disabled = !ok;
-}
-
-async function checkAvailability() {
-  const item  = document.getElementById('item').value;
-  const start = document.getElementById('start-date').value;
-  const end   = document.getElementById('end-date').value;
-  if (!item || !start || !end) { setAvailStrip(''); return; }
-  setAvailStrip('Checking…', '');
+async function checkAvail() {
+  const name=$('r-item').value, s=$('r-start').value, e=$('r-end').value;
+  if (!name||!s||!e) { setAvail(''); return; }
+  setAvail('Checking…','');
   try {
-    const reservations = await readCSV('reservations.csv');
-    const conflict = findConflict(reservations, item, start, end);
-    if (conflict) {
-      setAvailStrip(`Not available — booked by ${conflict['Reserved By']} from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}`, 'busy');
-    } else {
-      setAvailStrip('Available for these dates ✓', 'free');
-    }
-  } catch { setAvailStrip('Could not check availability', ''); }
+    const [reservations, checkouts] = await Promise.all([readCSV('reservations.csv'), readCSV('checkouts.csv')]);
+    const item = allItems.find(i=>i['Item Name']===name);
+    if (!item) { setAvail('Item not found',''); return; }
+    const avail = calcAvailable(item, s, e, reservations, checkouts);
+    const total = parseInt(item['Total Units'])||1;
+    if (avail <= 0) setAvail(`Not available — all ${total} unit${total>1?'s':''} are reserved or taken for these dates`,'busy');
+    else setAvail(`Available — ${avail} of ${total} unit${total>1?'s':''} free for these dates ✓`,'free');
+  } catch { setAvail('Could not check availability',''); }
 }
 
-document.getElementById('category').addEventListener('change', e => {
+$('r-cat').addEventListener('change', e => {
   if (e.target.value) populateItems(e.target.value);
-  else {
-    document.getElementById('item').innerHTML = '<option value="">Select an item…</option>';
-    document.getElementById('item').disabled = true;
-    document.getElementById('model-field').style.display = 'none';
-    setAvailStrip('');
-  }
-  hideBanner('add-banner'); updateSubmitState();
+  else { $('r-item').innerHTML='<option value="">Select an item…</option>'; $('r-item').disabled=true; $('r-model-field').classList.add('hidden'); setAvail(''); }
+  hideBanner('r-banner'); updateResSubmit();
 });
+$('r-item').addEventListener('change', e => { onItemSel(e.target.value); hideBanner('r-banner'); checkAvail(); updateResSubmit(); });
+$('r-start').addEventListener('change', e => { $('r-end').min=e.target.value; if($('r-end').value&&$('r-end').value<e.target.value)$('r-end').value=e.target.value; hideBanner('r-banner'); checkAvail(); updateResSubmit(); });
+$('r-end').addEventListener('change', ()=>{ hideBanner('r-banner'); checkAvail(); updateResSubmit(); });
+$('r-name').addEventListener('input', updateResSubmit);
 
-document.getElementById('item').addEventListener('change', e => {
-  onItemSelected(e.target.value);
-  hideBanner('add-banner');
-  checkAvailability();
-  updateSubmitState();
-});
-
-document.getElementById('start-date').addEventListener('change', e => {
-  const endInput = document.getElementById('end-date');
-  endInput.min = e.target.value;
-  if (endInput.value && endInput.value < e.target.value) endInput.value = e.target.value;
-  hideBanner('add-banner'); checkAvailability(); updateSubmitState();
-});
-document.getElementById('end-date').addEventListener('change', () => { hideBanner('add-banner'); checkAvailability(); updateSubmitState(); });
-document.getElementById('name').addEventListener('input', updateSubmitState);
-
-document.getElementById('res-form').addEventListener('submit', e => {
-  e.preventDefault();
-  hideBanner('add-banner');
-
-  const category  = document.getElementById('category').value;
-  const itemName  = document.getElementById('item').value;
-  const modelNum  = document.getElementById('model-number').value.trim();
-  const startDate = document.getElementById('start-date').value;
-  const endDate   = document.getElementById('end-date').value;
-  const name      = document.getElementById('name').value.trim();
-
-  requireToken(async (token) => {
-    setLoading('submit-btn', true, 'Reserve item');
+$('res-form').addEventListener('submit', e => {
+  e.preventDefault(); hideBanner('r-banner');
+  const cat=$('r-cat').value, iName=$('r-item').value, model=$('r-model').value.trim();
+  const sDate=$('r-start').value, eDate=$('r-end').value, name=$('r-name').value.trim();
+  requireToken(async tok => {
+    setLoading('r-submit', true, 'Reserve item');
     try {
-      const freshReservations = await readCSV('reservations.csv');
-      const conflict = findConflict(freshReservations, itemName, startDate, endDate);
-      if (conflict) {
-        showBanner('add-banner', 'conflict', 'Not available',
-          `${itemName} is already booked by <strong>${conflict['Reserved By']}</strong> from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}.`);
-        setAvailStrip(`Not available — booked by ${conflict['Reserved By']} from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])}`, 'busy');
-        setLoading('submit-btn', false, 'Reserve item');
-        return;
+      const [freshRes, freshChk] = await Promise.all([readCSV('reservations.csv'), readCSV('checkouts.csv')]);
+      const item=allItems.find(i=>i['Item Name']===iName);
+      const avail=calcAvailable(item, sDate, eDate, freshRes, freshChk);
+      if (avail<=0) {
+        showBanner('r-banner','error','Not available',`All units of ${iName} are taken or reserved for these dates.`);
+        setLoading('r-submit',false,'Reserve item'); return;
+      }
+      const id=resID();
+      const newRow={'Category':cat,'Item Name':iName,'ID / Model Number':model,'Reserved By':name,'Start Date':sDate,'End Date':eDate,'Timestamp':tsNow(),'_id':id};
+      // Store _id in timestamp field prefix for reference (we use a separate _id column trick — simpler: use timestamp as ID)
+      const rowToSave={...newRow}; delete rowToSave['_id'];
+      rowToSave['Timestamp']=id; // reuse Timestamp as unique ID (ISO timestamp is unique enough)
+      await writeCSV('reservations.csv', RES_HDR, [...freshRes.map(r=>({...r})), rowToSave], tok);
+      showBanner('r-banner','success','Reserved',`${iName} booked for <strong>${name}</strong> from ${fmt(sDate)} to ${fmt(eDate)}.`);
+      resetResForm(); populateCats();
+    } catch(err) { showBanner('r-banner','error','Error',err.message||'Could not save.'); }
+    setLoading('r-submit',false,'Reserve item');
+  });
+});
+
+// ── VIEW RESERVATIONS ─────────────────────────────────────────────────────
+async function openViewRes() {
+  $('view-res-body').innerHTML='<div class="skel" style="height:100px"></div>';
+  try {
+    const [reservations, checkouts] = await Promise.all([readCSV('reservations.csv'), readCSV('checkouts.csv')]);
+    const takenIDs=new Set(checkouts.filter(c=>c['Status']==='taken').map(c=>c['Reservation ID']));
+    const td=today();
+    const active=reservations.filter(r=>r['End Date']>=td).sort((a,b)=>a['Start Date'].localeCompare(b['Start Date']));
+    const past=reservations.filter(r=>r['End Date']<td);
+    let html='';
+    const mkTable=(rows,showStatus)=>{
+      let h=`<table class="t"><thead><tr><th>Item</th><th>Who</th><th>From</th><th>To</th>${showStatus?'<th>Status</th>':''}</tr></thead><tbody>`;
+      rows.forEach(r=>{
+        const taken=takenIDs.has(r['Timestamp']);
+        h+=`<tr><td>${r['Item Name']}${r['ID / Model Number']?`<br><small style="color:var(--muted)">${r['ID / Model Number']}</small>`:''}</td>`;
+        h+=`<td>${r['Reserved By']}</td><td>${fmt(r['Start Date'])}</td><td>${fmt(r['End Date'])}</td>`;
+        if(showStatus) h+=`<td><span class="badge ${taken?'taken':'avail'}">${taken?'Taken':'Pending'}</span></td>`;
+        h+=`</tr>`;
+      });
+      h+=`</tbody></table>`; return h;
+    };
+    if (!active.length&&!past.length) html='<div class="empty">No reservations yet.</div>';
+    else {
+      if(active.length){html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Current & upcoming</div>`+mkTable(active,true);}
+      if(past.length){html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted);margin:16px 0 8px">Past</div><div style="opacity:.6">`+mkTable(past,false)+`</div>`;}
+    }
+    $('view-res-body').innerHTML=html;
+  } catch { $('view-res-body').innerHTML='<div class="empty">Could not load reservations.</div>'; }
+}
+
+// ── MODIFY RESERVATION ────────────────────────────────────────────────────
+async function openModRes() {
+  hide('mod-fields'); const s=$('mod-sel'); s.innerHTML='<option value="">Loading…</option>'; s.disabled=true;
+  try {
+    const rows=await readCSV('reservations.csv');
+    const active=rows.filter(r=>r['End Date']>=today());
+    s.innerHTML='<option value="">Choose a reservation…</option>';
+    active.forEach(r=>{ const o=document.createElement('option'); o.value=rows.indexOf(r); o.textContent=`${r['Item Name']} — ${r['Reserved By']} (${fmt(r['Start Date'])} to ${fmt(r['End Date'])})`; s.appendChild(o); });
+    s.disabled=false;
+  } catch { s.innerHTML='<option value="">Could not load</option>'; }
+}
+
+$('mod-sel').addEventListener('change', async function(){
+  if(!this.value){$('mod-fields').classList.add('hidden');return;}
+  const rows=await readCSV('reservations.csv'); const r=rows[parseInt(this.value)]; if(!r)return;
+  $('mod-start').value=r['Start Date']; $('mod-start').min=today();
+  $('mod-end').value=r['End Date']; $('mod-end').min=r['Start Date'];
+  $('mod-name').value=r['Reserved By']; hideBanner('mod-banner'); $('mod-fields').classList.remove('hidden');
+});
+
+$('mod-btn').addEventListener('click', ()=>{
+  const idx=parseInt($('mod-sel').value), ns=$('mod-start').value, ne=$('mod-end').value, nn=$('mod-name').value.trim();
+  if(!ns||!ne||!nn){showBanner('mod-banner','error','Missing fields','Fill in all fields.');return;}
+  requireToken(async tok=>{
+    setLoading('mod-btn',true,'Save changes'); hideBanner('mod-banner');
+    try {
+      const freshRes=await readCSV('reservations.csv'); const r=freshRes[idx];
+      if(!r){showBanner('mod-banner','error','Not found','Reservation no longer exists.');setLoading('mod-btn',false,'Save changes');return;}
+      // Check availability excluding this reservation
+      const [freshChk]=await Promise.all([readCSV('checkouts.csv')]);
+      const tempRes=freshRes.filter((_,i)=>i!==idx);
+      const item=allItems.find(i=>i['Item Name']===r['Item Name']);
+      const avail=calcAvailable(item,ns,ne,tempRes,freshChk);
+      if(avail<=0){showBanner('mod-banner','error','Conflict',`No units available for these new dates.`);setLoading('mod-btn',false,'Save changes');return;}
+      freshRes[idx]={...r,'Reserved By':nn,'Start Date':ns,'End Date':ne,'Timestamp':r['Timestamp']};
+      await writeCSV('reservations.csv',RES_HDR,freshRes,tok);
+      showBanner('mod-banner','success','Updated',`Updated for <strong>${nn}</strong> from ${fmt(ns)} to ${fmt(ne)}.`);
+      $('mod-fields').classList.add('hidden'); $('mod-sel').value='';
+    } catch(err){showBanner('mod-banner','error','Error',err.message||'Could not save.');}
+    setLoading('mod-btn',false,'Save changes');
+  });
+});
+
+// ── DELETE RESERVATION ────────────────────────────────────────────────────
+async function openDelRes() {
+  $('del-preview').classList.add('hidden'); const s=$('del-sel'); s.innerHTML='<option value="">Loading…</option>'; s.disabled=true;
+  try {
+    const rows=await readCSV('reservations.csv'); const active=rows.filter(r=>r['End Date']>=today());
+    s.innerHTML='<option value="">Choose a reservation…</option>';
+    active.forEach(r=>{ const o=document.createElement('option'); o.value=rows.indexOf(r); o.textContent=`${r['Item Name']} — ${r['Reserved By']} (${fmt(r['Start Date'])} to ${fmt(r['End Date'])})`; s.appendChild(o); });
+    s.disabled=false;
+  } catch { s.innerHTML='<option value="">Could not load</option>'; }
+}
+
+$('del-sel').addEventListener('change', async function(){
+  if(!this.value){$('del-preview').classList.add('hidden');return;}
+  const rows=await readCSV('reservations.csv'); const r=rows[parseInt(this.value)]; if(!r)return;
+  $('del-warn').innerHTML=`<strong>Delete this reservation?</strong>${r['Item Name']} for <strong>${r['Reserved By']}</strong> from ${fmt(r['Start Date'])} to ${fmt(r['End Date'])}.`;
+  hideBanner('del-banner'); $('del-preview').classList.remove('hidden');
+});
+
+$('del-confirm').addEventListener('click', ()=>{
+  const idx=parseInt($('del-sel').value);
+  requireToken(async tok=>{
+    setLoading('del-confirm',true,'Yes, delete it'); hideBanner('del-banner');
+    try {
+      const freshRes=await readCSV('reservations.csv'); freshRes.splice(idx,1);
+      await writeCSV('reservations.csv',RES_HDR,freshRes,tok);
+      showBanner('del-banner','success','Deleted','Reservation removed.');
+      $('del-preview').classList.add('hidden'); $('del-sel').value='';
+      await openDelRes(); showOnly('del-res');
+    } catch(err){showBanner('del-banner','error','Error',err.message||'Could not delete.');}
+    setLoading('del-confirm',false,'Yes, delete it');
+  });
+});
+
+// ── TAKE AN ITEM ──────────────────────────────────────────────────────────
+async function openTake() {
+  $('take-detail').classList.add('hidden');
+  const s=$('take-sel'); s.innerHTML='<option value="">Loading…</option>'; s.disabled=true;
+  try {
+    const [reservations, checkouts] = await Promise.all([readCSV('reservations.csv'), readCSV('checkouts.csv')]);
+    const td=today();
+    const takenIDs=new Set(checkouts.filter(c=>c['Status']==='taken').map(c=>c['Reservation ID']));
+    // Show reservations that: start date <= today, end date >= today, not already taken
+    const ready=reservations.filter(r=>r['Start Date']<=td && r['End Date']>=td && !takenIDs.has(r['Timestamp']));
+    s.innerHTML='<option value="">Select your reservation…</option>';
+    if(!ready.length){ s.innerHTML='<option value="">No active reservations ready to take</option>'; s.disabled=true; return; }
+    ready.forEach(r=>{ const o=document.createElement('option'); o.value=r['Timestamp']; o.textContent=`${r['Item Name']} — ${r['Reserved By']} (until ${fmt(r['End Date'])})`; s.appendChild(o); });
+    s.disabled=false;
+  } catch { s.innerHTML='<option value="">Could not load</option>'; }
+}
+
+$('take-sel').addEventListener('change', async function(){
+  if(!this.value){$('take-detail').classList.add('hidden');return;}
+  const rows=await readCSV('reservations.csv'); const r=rows.find(x=>x['Timestamp']===this.value); if(!r)return;
+  $('take-info').innerHTML=`<strong>Confirm you are taking this item</strong>${r['Item Name']}${r['ID / Model Number']?' ('+r['ID / Model Number']+')':''} reserved for <strong>${r['Reserved By']}</strong> until ${fmt(r['End Date'])}.`;
+  hideBanner('take-banner'); $('take-detail').classList.remove('hidden');
+});
+
+$('take-btn').addEventListener('click', ()=>{
+  const resID=$('take-sel').value;
+  requireToken(async tok=>{
+    setLoading('take-btn',true,'Confirm — I\'m taking this item'); hideBanner('take-banner');
+    try {
+      const [freshRes, freshChk, freshItems] = await Promise.all([readCSV('reservations.csv'), readCSV('checkouts.csv'), readCSV('items.csv')]);
+      const r=freshRes.find(x=>x['Timestamp']===resID);
+      if(!r){showBanner('take-banner','error','Not found','Reservation not found.');setLoading('take-btn',false,'Confirm — I\'m taking this item');return;}
+      // Add checkout record
+      const newChk={'Item Name':r['Item Name'],'ID / Model Number':r['ID / Model Number'],'Reservation ID':resID,'Taken By':r['Reserved By'],'Taken Timestamp':tsNow(),'Returned By':'','On Behalf Of':'','Return Timestamp':'','Photo Path':'','Status':'taken'};
+      // Decrement Units Available
+      const updItems=freshItems.map(i=>{
+        if(i['Item Name']===r['Item Name']){
+          const ua=Math.max(0,(parseInt(i['Units Available'])||0)-1);
+          return {...i,'Units Available':ua.toString()};
+        } return i;
+      });
+      await Promise.all([
+        writeCSV('checkouts.csv', CHK_HDR, [...freshChk, newChk], tok),
+        writeCSV('items.csv', ITM_HDR, updItems, tok)
+      ]);
+      showBanner('take-banner','success','Taken',`${r['Item Name']} marked as taken by <strong>${r['Reserved By']}</strong>.`);
+      $('take-detail').classList.add('hidden'); $('take-sel').value='';
+      await openTake(); showOnly('take');
+    } catch(err){showBanner('take-banner','error','Error',err.message||'Could not save.');}
+    setLoading('take-btn',false,'Confirm — I\'m taking this item');
+  });
+});
+
+// ── RETURN AN ITEM ────────────────────────────────────────────────────────
+let photoB64 = null;
+
+async function openReturn() {
+  $('ret-fields').classList.add('hidden'); photoB64=null;
+  $('photo-preview').style.display='none'; $('photo-preview').src='';
+  $('photo-input').value=''; $('photo-hint').textContent='';
+  const s=$('ret-sel'); s.innerHTML='<option value="">Loading…</option>'; s.disabled=true;
+  try {
+    const checkouts=await readCSV('checkouts.csv');
+    const active=checkouts.filter(c=>c['Status']==='taken');
+    s.innerHTML='<option value="">Select item being returned…</option>';
+    if(!active.length){s.innerHTML='<option value="">No items currently taken</option>';s.disabled=true;return;}
+    active.forEach((c,i)=>{ const o=document.createElement('option'); o.value=checkouts.indexOf(c); o.textContent=`${c['Item Name']}${c['ID / Model Number']?' ('+c['ID / Model Number']+')':''} — taken by ${c['Taken By']}`; s.appendChild(o); });
+    s.disabled=false;
+  } catch { s.innerHTML='<option value="">Could not load</option>'; }
+}
+
+$('ret-sel').addEventListener('change', function(){
+  if(!this.value){$('ret-fields').classList.add('hidden');return;}
+  $('ret-by').value=''; $('ret-behalf').value=''; photoB64=null;
+  $('photo-preview').style.display='none'; $('photo-hint').textContent='';
+  hideBanner('ret-banner'); $('ret-fields').classList.remove('hidden');
+});
+
+// Photo handling
+$('photo-input').addEventListener('change', async function(){
+  const file=this.files[0]; if(!file)return;
+  $('photo-hint').textContent='Compressing…';
+  try {
+    photoB64=await compressImage(file);
+    const preview=$('photo-preview');
+    preview.src=`data:image/jpeg;base64,${photoB64}`;
+    preview.style.display='block';
+    const kb=Math.round(photoB64.length*0.75/1024);
+    $('photo-hint').textContent=`Photo ready — approx. ${kb} KB after compression.`;
+  } catch { $('photo-hint').textContent='Could not process photo. Try another image.'; photoB64=null; }
+});
+
+['dragover','dragenter'].forEach(ev=>$('photo-drop').addEventListener(ev,e=>{e.preventDefault();$('photo-drop').classList.add('over');}));
+['dragleave','drop'].forEach(ev=>$('photo-drop').addEventListener(ev,e=>{e.preventDefault();$('photo-drop').classList.remove('over');}));
+
+$('ret-btn').addEventListener('click', ()=>{
+  const idx=parseInt($('ret-sel').value);
+  const retBy=$('ret-by').value.trim();
+  const behalf=$('ret-behalf').value.trim();
+  if(!retBy){showBanner('ret-banner','error','Required','Please enter who is returning the item.');return;}
+  requireToken(async tok=>{
+    setLoading('ret-btn',true,'Confirm return'); hideBanner('ret-banner');
+    try {
+      const [freshChk, freshItems] = await Promise.all([readCSV('checkouts.csv'), readCSV('items.csv')]);
+      const c=freshChk[idx];
+      if(!c||c['Status']!=='taken'){showBanner('ret-banner','error','Not found','This checkout record is no longer active.');setLoading('ret-btn',false,'Confirm return');return;}
+
+      let photoPath='';
+      if(photoB64){
+        const ts=Date.now(); const safeName=c['Item Name'].replace(/[^a-z0-9]/gi,'-').toLowerCase();
+        photoPath=`photos/${ts}-${safeName}.txt`;
+        await writeFile(photoPath, photoB64, tok);
       }
 
-      const newRow = {
-        'Category': category, 'Item Name': itemName,
-        'ID / Model Number': modelNum,
-        'Reserved By': name, 'Start Date': startDate, 'End Date': endDate,
-        'Timestamp': new Date().toISOString()
-      };
+      freshChk[idx]={...c,'Returned By':retBy,'On Behalf Of':behalf,'Return Timestamp':tsNow(),'Photo Path':photoPath,'Status':'returned'};
 
-      await writeCSV('reservations.csv', RES_HEADERS, [...freshReservations, newRow], token);
-      showBanner('add-banner', 'success', 'Reserved',
-        `${itemName} is booked for <strong>${name}</strong> from ${fmt(startDate)} to ${fmt(endDate)}.`);
-      resetAddForm();
-    } catch (err) {
-      showBanner('add-banner', 'conflict', 'Something went wrong', err.message || 'Could not save. Please try again.');
-    }
-    setLoading('submit-btn', false, 'Reserve item');
-  });
-});
-
-// ── VIEW ──────────────────────────────────────────────────────────────────
-async function openView() {
-  show('view-card');
-  document.getElementById('view-table-wrap').innerHTML = '<div class="skeleton" style="height:80px"></div>';
-  try {
-    const reservations = await readCSV('reservations.csv');
-    renderViewTable(reservations);
-  } catch {
-    document.getElementById('view-table-wrap').innerHTML = '<div class="empty-state">Could not load reservations.</div>';
-  }
-}
-
-function renderViewTable(reservations) {
-  const active = reservations.filter(r => r['End Date'] >= today()).sort((a,b) => a['Start Date'].localeCompare(b['Start Date']));
-  const past   = reservations.filter(r => r['End Date'] < today()).sort((a,b) => b['Start Date'].localeCompare(a['Start Date']));
-  let html = '';
-  if (!active.length && !past.length) {
-    html = '<div class="empty-state">No reservations yet.</div>';
-  } else {
-    if (active.length) {
-      html += `<div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Current & upcoming</div>`;
-      html += `<table class="res-table"><thead><tr><th>Item</th><th>Model / ID</th><th>Reserved by</th><th>From</th><th>To</th></tr></thead><tbody>`;
-      active.forEach(r => {
-        html += `<tr><td>${r['Item Name']}</td><td style="color:var(--muted)">${r['ID / Model Number'] || '—'}</td><td>${r['Reserved By']}</td><td>${fmt(r['Start Date'])}</td><td>${fmt(r['End Date'])}</td></tr>`;
+      // Increment Units Available
+      const updItems=freshItems.map(i=>{
+        if(i['Item Name']===c['Item Name']){
+          const total=parseInt(i['Total Units'])||1;
+          const ua=Math.min(total,(parseInt(i['Units Available'])||0)+1);
+          return {...i,'Units Available':ua.toString()};
+        } return i;
       });
-      html += `</tbody></table>`;
-    }
-    if (past.length) {
-      html += `<div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px">Past</div>`;
-      html += `<table class="res-table" style="opacity:.6"><thead><tr><th>Item</th><th>Reserved by</th><th>From</th><th>To</th></tr></thead><tbody>`;
-      past.forEach(r => {
-        html += `<tr><td>${r['Item Name']}</td><td>${r['Reserved By']}</td><td>${fmt(r['Start Date'])}</td><td>${fmt(r['End Date'])}</td></tr>`;
-      });
-      html += `</tbody></table>`;
-    }
-  }
-  document.getElementById('view-table-wrap').innerHTML = html;
-}
 
-// ── MODIFY ────────────────────────────────────────────────────────────────
-async function openModify() {
-  show('modify-card');
-  hide('modify-fields');
-  const sel = document.getElementById('modify-select');
-  sel.innerHTML = '<option value="">Loading…</option>';
-  sel.disabled = true;
-  try {
-    const reservations = await readCSV('reservations.csv');
-    const active = reservations.filter(r => r['End Date'] >= today());
-    sel.innerHTML = '<option value="">Choose a reservation…</option>';
-    active.forEach(r => {
-      const o = document.createElement('option');
-      o.value = reservations.indexOf(r);
-      o.textContent = `${r['Item Name']} — ${r['Reserved By']} (${fmt(r['Start Date'])} to ${fmt(r['End Date'])})`;
-      sel.appendChild(o);
-    });
-    sel.disabled = false;
-  } catch {
-    sel.innerHTML = '<option value="">Could not load reservations</option>';
-  }
-}
+      await Promise.all([
+        writeCSV('checkouts.csv', CHK_HDR, freshChk, tok),
+        writeCSV('items.csv', ITM_HDR, updItems, tok)
+      ]);
 
-document.getElementById('modify-select').addEventListener('change', async function() {
-  if (!this.value) { hide('modify-fields'); return; }
-  const reservations = await readCSV('reservations.csv');
-  const r = reservations[parseInt(this.value)];
-  if (!r) return;
-  document.getElementById('modify-start').value = r['Start Date'];
-  document.getElementById('modify-start').min = today();
-  document.getElementById('modify-end').value = r['End Date'];
-  document.getElementById('modify-end').min = r['Start Date'];
-  document.getElementById('modify-name').value = r['Reserved By'];
-  hideBanner('modify-banner');
-  show('modify-fields');
-});
-
-document.getElementById('modify-btn').addEventListener('click', () => {
-  const idx      = parseInt(document.getElementById('modify-select').value);
-  const newStart = document.getElementById('modify-start').value;
-  const newEnd   = document.getElementById('modify-end').value;
-  const newName  = document.getElementById('modify-name').value.trim();
-  if (!newStart || !newEnd || !newName) { showBanner('modify-banner', 'conflict', 'Missing fields', 'Please fill in all fields.'); return; }
-
-  requireToken(async (token) => {
-    setLoading('modify-btn', true, 'Save changes');
-    hideBanner('modify-banner');
-    try {
-      const freshReservations = await readCSV('reservations.csv');
-      const r = freshReservations[idx];
-      if (!r) { showBanner('modify-banner', 'conflict', 'Not found', 'This reservation no longer exists.'); setLoading('modify-btn', false, 'Save changes'); return; }
-      const conflict = findConflict(freshReservations, r['Item Name'], newStart, newEnd, idx);
-      if (conflict) {
-        showBanner('modify-banner', 'conflict', 'Conflict',
-          `${r['Item Name']} is booked by <strong>${conflict['Reserved By']}</strong> from ${fmt(conflict['Start Date'])} to ${fmt(conflict['End Date'])} during that period.`);
-        setLoading('modify-btn', false, 'Save changes'); return;
-      }
-      freshReservations[idx] = { ...r, 'Reserved By': newName, 'Start Date': newStart, 'End Date': newEnd, 'Timestamp': new Date().toISOString() };
-      await writeCSV('reservations.csv', RES_HEADERS, freshReservations, token);
-      showBanner('modify-banner', 'success', 'Updated', `Reservation updated for <strong>${newName}</strong> from ${fmt(newStart)} to ${fmt(newEnd)}.`);
-      hide('modify-fields');
-      document.getElementById('modify-select').value = '';
-    } catch (err) {
-      showBanner('modify-banner', 'conflict', 'Error', err.message || 'Could not save. Please try again.');
-    }
-    setLoading('modify-btn', false, 'Save changes');
+      showBanner('ret-banner','success','Returned',`${c['Item Name']} returned by <strong>${retBy}</strong>.${behalf?` On behalf of <strong>${behalf}</strong>.`:''}`);
+      $('ret-fields').classList.add('hidden'); $('ret-sel').value=''; photoB64=null;
+      await openReturn(); showOnly('return');
+    } catch(err){showBanner('ret-banner','error','Error',err.message||'Could not save.');}
+    setLoading('ret-btn',false,'Confirm return');
   });
 });
 
-// ── DELETE ────────────────────────────────────────────────────────────────
-async function openDelete() {
-  show('delete-card');
-  hide('delete-preview');
-  const sel = document.getElementById('delete-select');
-  sel.innerHTML = '<option value="">Loading…</option>';
-  sel.disabled = true;
+// ── Photo viewer ──────────────────────────────────────────────────────────
+async function viewPhoto(path){
   try {
-    const reservations = await readCSV('reservations.csv');
-    const active = reservations.filter(r => r['End Date'] >= today());
-    sel.innerHTML = '<option value="">Choose a reservation…</option>';
-    active.forEach(r => {
-      const o = document.createElement('option');
-      o.value = reservations.indexOf(r);
-      o.textContent = `${r['Item Name']} — ${r['Reserved By']} (${fmt(r['Start Date'])} to ${fmt(r['End Date'])})`;
-      sel.appendChild(o);
-    });
-    sel.disabled = false;
+    const b64=await readFile(path);
+    $('photo-modal-img').src=`data:image/jpeg;base64,${b64}`;
+    $('photo-modal').classList.add('show');
+  } catch { alert('Could not load photo.'); }
+}
+function closePhotoModal(){$('photo-modal').classList.remove('show');}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function show(id){$(id).classList.remove('hidden');}
+function hide(id){$(id).classList.add('hidden');}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+async function init(){
+  try {
+    allItems=await readCSV('items.csv');
+    $('loading-card').classList.add('hidden');
+    showOnly('home');
+    // Wire up add-res navigation since it needs openAddRes()
+    document.querySelector('[data-go="add-res"]').addEventListener('click', openAddRes, {once:false});
   } catch {
-    sel.innerHTML = '<option value="">Could not load reservations</option>';
+    $('loading-card').innerHTML='<div style="color:var(--error);font-size:14px">Failed to load inventory. Please refresh.</div>';
   }
 }
 
-document.getElementById('delete-select').addEventListener('change', async function() {
-  if (!this.value) { hide('delete-preview'); return; }
-  const reservations = await readCSV('reservations.csv');
-  const r = reservations[parseInt(this.value)];
-  if (!r) return;
-  document.getElementById('delete-warn').innerHTML =
-    `<strong>Cancel this reservation?</strong>${r['Item Name']} reserved by <strong>${r['Reserved By']}</strong> from ${fmt(r['Start Date'])} to ${fmt(r['End Date'])}.`;
-  hideBanner('delete-banner');
-  show('delete-preview');
-});
-
-document.getElementById('confirm-delete-btn').addEventListener('click', () => {
-  const idx = parseInt(document.getElementById('delete-select').value);
-  requireToken(async (token) => {
-    setLoading('confirm-delete-btn', true, 'Yes, cancel it');
-    hideBanner('delete-banner');
-    try {
-      const freshReservations = await readCSV('reservations.csv');
-      freshReservations.splice(idx, 1);
-      await writeCSV('reservations.csv', RES_HEADERS, freshReservations, token);
-      showBanner('delete-banner', 'success', 'Cancelled', 'The reservation has been removed.');
-      hide('delete-preview');
-      document.getElementById('delete-select').value = '';
-      await openDelete();
-      show('delete-card');
-    } catch (err) {
-      showBanner('delete-banner', 'conflict', 'Error', err.message || 'Could not delete. Please try again.');
-    }
-    setLoading('confirm-delete-btn', false, 'Yes, cancel it');
-  });
-});
-
-// ── Init — no token needed to load ───────────────────────────────────────
-async function init() {
-  try {
-    allItems = await readCSV('items.csv');
-    hide('loading-card');
-    show('mode-card');
-  } catch {
-    document.getElementById('loading-card').innerHTML =
-      '<div style="color:var(--error);font-size:14px">Failed to load inventory. Please refresh.</div>';
+// Override data-go for add-res to also call openAddRes
+document.querySelectorAll('[data-go]').forEach(el=>{
+  if(el.dataset.go==='add-res'){
+    el.addEventListener('click', openAddRes);
   }
-}
+});
 
 init();
 </script>
