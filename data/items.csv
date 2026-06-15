@@ -1,9 +1,9 @@
-Category,Item Name,ID / Model Number
-Audio Visual,Projector,PJ-2041
-Audio Visual,Camera,CAM-007
-Audio Visual,Microphone,MIC-001
-IT Equipment,Laptop,
-IT Equipment,iPad,TAB-003
-IT Equipment,Monitor,MON-012
-Furniture,Standing Desk,
-Furniture,Foldable Table,
+Category,Item Name,ID / Model Number,Total Units,Units Available
+Audio Visual,Projector,PJ-2041,1,1
+Audio Visual,Camera,CAM-007,1,1
+Audio Visual,Microphone,MIC-001,2,2
+IT Equipment,Laptop,,3,3
+IT Equipment,iPad,TAB-003,2,2
+IT Equipment,Monitor,MON-012,1,1
+Furniture,Standing Desk,,2,2
+Furniture,Foldable Table,,3,3
