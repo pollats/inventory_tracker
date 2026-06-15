@@ -422,19 +422,27 @@ async function readCSV(path) {
   return parseCSV(atob(j.content.replace(/\n/g, '')));
 }
 
-async function writeCSV(path, headers, rows, tok) {
+async function writeCSV(path, headers, rows, tok, _retries = 4) {
   const url = API(`data/${path}`);
-  const meta = await (await fetch(url, { headers: ghH(tok) })).json();
-  const sha = meta.sha;
   const content = toCSV(headers, rows);
   const b64 = btoa(unescape(encodeURIComponent(content)));
-  const res = await fetch(url, {
-    method: 'PUT', headers: { ...ghH(tok), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: `Update ${path} — ${new Date().toISOString()}`, content: b64, sha })
-  });
-  if (!res.ok) {
+  for (let attempt = 0; attempt <= _retries; attempt++) {
+    // Always fetch the very latest SHA immediately before each PUT attempt
+    const metaRes = await fetch(url, { headers: ghH(tok) });
+    if (!metaRes.ok) throw new Error(`Could not read ${path} metadata`);
+    const sha = (await metaRes.json()).sha;
+    const res = await fetch(url, {
+      method: 'PUT', headers: { ...ghH(tok), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Update ${path} — ${new Date().toISOString()}`, content: b64, sha })
+    });
+    if (res.ok) return; // success
     const e = await res.json();
-    if (res.status === 401) { localStorage.removeItem(TOK_KEY); sessionStorage.removeItem(TOK_KEY); }
+    if (res.status === 401) { localStorage.removeItem(TOK_KEY); sessionStorage.removeItem(TOK_KEY); throw new Error('Invalid token'); }
+    if (res.status === 409 && attempt < _retries) {
+      // SHA conflict — wait and retry with fresh SHA
+      await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+      continue;
+    }
     throw new Error(e.message || 'Write failed');
   }
 }
@@ -480,6 +488,7 @@ const today = () => new Date().toISOString().split('T')[0];
 const fmt = d => { if (!d) return ''; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y}`; };
 const overlaps = (es,ee,rs,re) => es <= re && ee >= rs;
 const tsNow = () => new Date().toISOString();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // ── Availability ──────────────────────────────────────────────────────────
 // Available = Units Available (already reflects physical stock) minus
@@ -806,6 +815,7 @@ $('take-btn').addEventListener('click', ()=>{
       // Step 2: write checkout record
       const newChk={'Item Name':r['Item Name'],'ID / Model Number':r['ID / Model Number'],'Reservation ID':takeResID,'Taken By':r['Reserved By'],'Taken Timestamp':tsNow(),'Returned By':'','On Behalf Of':'','Return Timestamp':'','Photo Path':'','Status':'taken'};
       await writeCSV('checkouts.csv', CHK_HDR, [...freshChk, newChk], tok);
+      await sleep(400); // allow GitHub to propagate before next read
       // Step 3: re-read items fresh, decrement, write
       const freshItems = await readCSV('items.csv');
       const updItems = freshItems.map(i=>{
@@ -888,7 +898,7 @@ $('ret-btn').addEventListener('click', ()=>{
       const freshChk2 = await readCSV('checkouts.csv');
       freshChk2[idx]={...freshChk2[idx],'Returned By':retBy,'On Behalf Of':behalf,'Return Timestamp':tsNow(),'Photo Path':photoPath,'Status':'returned'};
       await writeCSV('checkouts.csv', CHK_HDR, freshChk2, tok);
-
+      await sleep(400);
       // Step 3: re-read items fresh, increment Units Available, write
       const freshItems = await readCSV('items.csv');
       const updItems = freshItems.map(i=>{
@@ -899,6 +909,7 @@ $('ret-btn').addEventListener('click', ()=>{
         } return i;
       });
       await writeCSV('items.csv', ITM_HDR, updItems, tok);
+      await sleep(400);
       // Step 4: build archive record from checkout + reservation data
       const freshRes = await readCSV('reservations.csv');
       const matchedRes = freshRes.find(r => r['Timestamp'] === freshChk2[idx]['Reservation ID']) || {};
@@ -923,6 +934,7 @@ $('ret-btn').addEventListener('click', ()=>{
       // Step 5: append to archive.csv
       const freshArchive = await readCSV('archive.csv');
       await writeCSV('archive.csv', ARCH_HDR, [...freshArchive, archiveRow], tok);
+      await sleep(400);
       // Step 6: remove linked reservation from reservations.csv
       const updRes = freshRes.filter(r => r['Timestamp'] !== freshChk2[idx]['Reservation ID']);
       if(updRes.length !== freshRes.length) {
