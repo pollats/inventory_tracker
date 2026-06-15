@@ -898,6 +898,12 @@ $('ret-btn').addEventListener('click', ()=>{
         } return i;
       });
       await writeCSV('items.csv', ITM_HDR, updItems, tok);
+      // Step 4: remove the linked reservation from reservations.csv
+      const freshRes = await readCSV('reservations.csv');
+      const updRes = freshRes.filter(r => r['Timestamp'] !== freshChk2[idx]['Reservation ID']);
+      if(updRes.length !== freshRes.length) {
+        await writeCSV('reservations.csv', RES_HDR, updRes, tok);
+      }
 
       showConfirm('returned', 'Item returned', `<strong>${c['Item Name']}</strong> has been returned by <strong>${retBy}</strong>.${behalf?`<br>On behalf of <strong>${behalf}</strong>.`:''}${photoPath?`<br><span style="color:var(--success);font-size:13px">📷 Photo saved.</span>`:''}`, async () => { await openReturn(); showOnly('return'); });
     } catch(err){showBanner('ret-banner','error','Error',err.message||'Could not save.');}
