@@ -561,10 +561,12 @@
 
 <!-- MANAGE ITEMS -->
 
-  <!-- Manage items: sub-menu -->
+  <!-- Manage items: sub-menu (same pattern as res-menu-card) -->
   <div class="hidden" id="manage-items-card">
     <div class="ch" style="margin-bottom:20px;padding-top:4px">
-      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Manage inventory</div>
+      <div>
+        <div style="font-size:18px;font-weight:700;color:var(--text)">Manage inventory</div>
+      </div>
       <button class="back" onclick="goHome()">← Home</button>
     </div>
     <div class="submenu-stack">
@@ -581,134 +583,13 @@
     </div>
   </div>
 
-  <!-- Manage items: add -->
+  <!-- Manage items: add new -->
   <div class="hidden" id="mi-add-card">
-    <div class="ch">
-      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Add new item</div>
+    <div class="ch" style="margin-bottom:20px;padding-top:4px">
+      <div style="font-size:18px;font-weight:700;color:var(--text)">Add new item</div>
       <button class="back" onclick="goSection('manage-items')">← Back</button>
     </div>
-    <div class="panel">
-    <div class="field">
-      <label for="mi-cat">Category <span class="req">*</span></label>
-      <input type="text" id="mi-cat" placeholder="e.g. Audio Visual" list="mi-cat-list" autocomplete="off"/>
-      <datalist id="mi-cat-list"></datalist>
-    </div>
-    <div class="field">
-      <label for="mi-name">Item name <span class="req">*</span></label>
-      <input type="text" id="mi-name" placeholder="e.g. Projector"/>
-    </div>
-    <div class="field">
-      <label for="mi-model">ID / Model number <span class="opt">(optional)</span></label>
-      <input type="text" id="mi-model" placeholder="e.g. PJ-2041"/>
-    </div>
-    <div class="field-row">
-      <div>
-        <label for="mi-total">Total units <span class="req">*</span></label>
-        <input type="text" id="mi-total" placeholder="e.g. 3"/>
-      </div>
-      <div>
-        <label for="mi-avail">Units available <span class="req">*</span></label>
-        <input type="text" id="mi-avail" placeholder="e.g. 3"/>
-      </div>
-    </div>
-    <button class="btn" id="mi-save-btn">Add item</button>
-    <div class="banner" id="mi-banner"></div>
-    </div>
-  </div>
-
-  <!-- Manage items: view / edit / remove -->
-  <div class="hidden" id="mi-view-card">
-    <div class="ch">
-      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Existing items</div>
-      <button class="back" onclick="goSection('manage-items')">← Back</button>
-    </div>
-    <div class="panel">
-    <div class="field" style="margin-bottom:14px">
-      <input type="text" id="mi-search" placeholder="Search items…" style="font-size:13px"/>
-    </div>
-    <div id="mi-list"></div>
-    </div>
-  </div>
-
-  <!-- Edit item modal -->
-  <div class="overlay" id="mi-edit-overlay">
-    <div class="dialog" style="max-width:360px">
-      <div class="ch" style="margin-bottom:18px">
-        <h3 id="mi-edit-title" style="font-size:15px">Edit item</h3>
-        <button class="back" onclick="closeMiEdit()">✕</button>
-      </div>
-      <div class="field">
-        <label for="mi-edit-cat">Category <span class="req">*</span></label>
-        <input type="text" id="mi-edit-cat" list="mi-edit-cat-list"/>
-        <datalist id="mi-edit-cat-list"></datalist>
-      </div>
-      <div class="field">
-        <label for="mi-edit-name">Item name <span class="req">*</span></label>
-        <input type="text" id="mi-edit-name"/>
-      </div>
-      <div class="field">
-        <label for="mi-edit-model">ID / Model <span class="opt">(optional)</span></label>
-        <input type="text" id="mi-edit-model"/>
-      </div>
-      <div class="field-row">
-        <div>
-          <label for="mi-edit-total">Total units</label>
-          <input type="text" id="mi-edit-total"/>
-        </div>
-        <div>
-          <label for="mi-edit-avail">Available</label>
-          <input type="text" id="mi-edit-avail"/>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn" id="mi-edit-save-btn">Save changes</button>
-        <button class="btn ghost" onclick="closeMiEdit()">Cancel</button>
-      </div>
-      <div class="banner" id="mi-edit-banner"></div>
-    </div>
-  </div>
-
-<!-- ARCHIVE -->
-  <div class="hidden" id="archive-card">
-    <div class="ch">
-      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Returns archive</div>
-      <button class="back" onclick="goHome()">← Home</button>
-    </div>
-    <div class="panel">
-    <div class="field" style="margin-bottom:12px">
-      <input type="text" id="arch-search" placeholder="Search by item, person, date…" style="font-size:13px"/>
-    </div>
-    <div id="archive-body"><div class="skel" style="height:80px"></div></div>
-  </div>
-
-<!-- Photo viewer modal -->
-<div class="overlay" id="photo-viewer-overlay">
-  <div class="dialog" style="max-width:520px;padding:20px">
-    <div class="ch" style="margin-bottom:12px">
-      <div>
-        <div style="font-size:15px;font-weight:600" id="pv-title"></div>
-        <div style="font-size:12px;color:var(--muted)" id="pv-sub"></div>
-      </div>
-      <button class="back" onclick="closePhotoViewer()">✕ Close</button>
-    </div>
-    <img id="pv-img" src="" alt="Condition photo" style="max-width:100%;border-radius:8px;display:block"/>
-    <div style="font-size:12px;color:var(--muted);margin-top:10px" id="pv-meta"></div>
-  </div>
-</div>
-
-<!-- MANAGE ITEMS -->
-  <div class="hidden" id="manage-items-card">
-    <div class="ch">
-      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Manage items</div>
-      <button class="back" onclick="goHome()">← Home</button>
-    </div>
-
-    <!-- Item list -->
-    <div id="mi-list" style="margin-bottom:16px"></div>
-
-    <!-- Add / Edit form -->
-    <div id="mi-form-wrap" style="border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg)">
-      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px" id="mi-form-title">Add new item</div>
+    <div class="submenu-stack" style="padding:20px">
       <div class="field">
         <label for="mi-cat">Category <span class="req">*</span></label>
         <input type="text" id="mi-cat" placeholder="e.g. Audio Visual" list="mi-cat-list" autocomplete="off"/>
@@ -732,11 +613,52 @@
           <input type="text" id="mi-avail" placeholder="e.g. 3"/>
         </div>
       </div>
-      <div class="btn-row">
-        <button class="btn" id="mi-save-btn">Add item</button>
-        <button class="btn ghost" id="mi-cancel-btn" onclick="resetMiForm()" style="display:none">Cancel edit</button>
-      </div>
+      <button class="btn" id="mi-save-btn">Add item</button>
       <div class="banner" id="mi-banner"></div>
+    </div>
+  </div>
+
+  <!-- Manage items: view existing -->
+  <div class="hidden" id="mi-view-card">
+    <div class="ch" style="margin-bottom:20px;padding-top:4px">
+      <div style="font-size:18px;font-weight:700;color:var(--text)">Existing items</div>
+      <button class="back" onclick="goSection('manage-items')">← Back</button>
+    </div>
+    <div class="submenu-stack" style="padding:16px 16px 8px">
+      <input type="text" id="mi-search" placeholder="Search items…" style="font-size:13px;margin-bottom:12px"/>
+    </div>
+    <div id="mi-list" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Edit item modal -->
+  <div class="overlay" id="mi-edit-overlay">
+    <div class="dialog" style="max-width:360px">
+      <div class="ch" style="margin-bottom:18px">
+        <h3 id="mi-edit-title" style="font-size:15px">Edit item</h3>
+        <button class="back" onclick="closeMiEdit()">✕</button>
+      </div>
+      <div class="field">
+        <label for="mi-edit-cat">Category <span class="req">*</span></label>
+        <input type="text" id="mi-edit-cat" list="mi-edit-cat-list"/>
+        <datalist id="mi-edit-cat-list"></datalist>
+      </div>
+      <div class="field">
+        <label for="mi-edit-name">Item name <span class="req">*</span></label>
+        <input type="text" id="mi-edit-name"/>
+      </div>
+      <div class="field">
+        <label for="mi-edit-model">ID / Model <span class="opt">(optional)</span></label>
+        <input type="text" id="mi-edit-model"/>
+      </div>
+      <div class="field-row">
+        <div><label for="mi-edit-total">Total units</label><input type="text" id="mi-edit-total"/></div>
+        <div><label for="mi-edit-avail">Available</label><input type="text" id="mi-edit-avail"/></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="mi-edit-save-btn">Save changes</button>
+        <button class="btn ghost" onclick="closeMiEdit()">Cancel</button>
+      </div>
+      <div class="banner" id="mi-edit-banner"></div>
     </div>
   </div>
 
