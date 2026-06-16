@@ -1419,17 +1419,15 @@ function renderMiList(items) {
       const tot = parseInt(item['Total Units']) || 1;
       const isLast = i === arr.length - 1;
       html += `
-      <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;${!isLast?'border-bottom:1px solid var(--border-soft)':''}">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;${!isLast?'border-bottom:1px solid var(--border-soft)':''}">
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-            ${item['Item Name']}${item['ID / Model Number']?` <span style="color:var(--text-3);font-size:11px;font-weight:400">${item['ID / Model Number']}</span>`:''}
+          <div style="font-size:13px;font-weight:500;color:var(--text)">
+            ${item['Item Name']}${item['ID / Model Number']?` <span style="color:var(--text-3);font-size:11px;font-weight:400">(${item['ID / Model Number']})</span>`:''}
           </div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:1px">${ua} / ${tot} available</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px">${ua} / ${tot} available</div>
         </div>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          <button onclick="openMiEdit(${idx})" style="padding:5px 12px;font-size:12px;font-weight:500;color:var(--accent);background:var(--accent-bg, #EFF6FF);border:none;border-radius:6px;cursor:pointer;font-family:inherit;transition:background .14s" onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#EFF6FF'">Edit</button>
-          <button onclick="confirmDeleteItem(${idx},'${item['Item Name'].replace(/'/g,"\'")}');" style="padding:5px 12px;font-size:12px;font-weight:500;color:var(--error);background:#FEF2F2;border:none;border-radius:6px;cursor:pointer;font-family:inherit;transition:background .14s" onmouseover="this.style.background='#FECACA'" onmouseout="this.style.background='#FEF2F2'">Remove</button>
-        </div>
+        <button onclick="openMiEdit(${idx})" style="padding:4px 10px;font-size:12px;font-weight:500;color:var(--accent);background:none;border:1px solid rgba(59,130,246,.25);border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .13s,border-color .13s" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='none'">Edit</button>
+        <button onclick="confirmDeleteItem(${idx},'${item['Item Name'].replace(/'/g,"\'")}');" style="padding:4px 10px;font-size:12px;font-weight:500;color:var(--text-3);background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .13s,color .13s" onmouseover="this.style.background='#FEF2F2';this.style.color='var(--error)'" onmouseout="this.style.background='none';this.style.color='var(--text-3)'">Remove</button>
       </div>`;
     });
     html += `</div>`;
