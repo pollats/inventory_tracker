@@ -415,7 +415,6 @@
       <button type="submit" class="btn" id="r-submit" disabled>Reserve item</button>
       <div class="banner" id="r-banner"></div>
     </form>
-    </div>
   </div>
 
   <!-- VIEW RESERVATIONS -->
@@ -424,7 +423,7 @@
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">All reservations</div>
       <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
-    <div class="panel" style="padding:0;overflow:hidden"><div id="view-res-body"></div></div>
+    <div id="view-res-body"></div>
   </div>
 
   <!-- MODIFY RESERVATION -->
@@ -433,7 +432,6 @@
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Modify reservation</div>
       <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
-    <div class="panel">
     <div class="field">
       <label for="mod-sel">Select reservation</label>
       <div class="select-wrap"><select id="mod-sel"><option value="">Choose…</option></select></div>
@@ -448,7 +446,6 @@
       <button class="btn" id="mod-btn">Save changes</button>
       <div class="banner" id="mod-banner"></div>
     </div>
-    </div>
   </div>
 
   <!-- DELETE RESERVATION -->
@@ -457,7 +454,6 @@
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Delete reservation</div>
       <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
-    <div class="panel">
     <div class="field">
       <label for="del-sel">Select reservation</label>
       <div class="select-wrap"><select id="del-sel"><option value="">Choose…</option></select></div>
@@ -470,7 +466,6 @@
       </div>
       <div class="banner" id="del-banner"></div>
     </div>
-    </div>
   </div>
 
   <!-- TAKE AN ITEM -->
@@ -479,8 +474,7 @@
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Take an item</div>
       <button class="back" onclick="goSection('borrow-menu')">← Back</button>
     </div>
-    <div class="panel">
-    <div class="field">"font-size:13px;color:var(--muted);margin-bottom:18px">Select your active reservation below. The item will be marked as taken.</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Select your active reservation below. The item will be marked as taken.</p>
     <div class="field">
       <label for="take-sel">Your reservation <span class="req">*</span></label>
       <div class="select-wrap"><select id="take-sel"><option value="">Loading…</option></select></div>
@@ -490,7 +484,6 @@
       <button class="btn" id="take-btn" style="margin-top:12px">Confirm — I'm taking this item</button>
       <div class="banner" id="take-banner"></div>
     </div>
-    </div>
   </div>
 
   <!-- RETURN AN ITEM -->
@@ -499,7 +492,6 @@
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Return an item</div>
       <button class="back" onclick="goSection('borrow-menu')">← Back</button>
     </div>
-    <div class="panel">
     <div class="field">
       <label for="ret-sel">Select item being returned <span class="req">*</span></label>
       <div class="select-wrap"><select id="ret-sel"><option value="">Loading…</option></select></div>
@@ -527,7 +519,6 @@
       <button class="btn" id="ret-btn">Confirm return</button>
       <div class="banner" id="ret-banner"></div>
     </div>
-    </div>
   </div>
 </div>
 
@@ -537,7 +528,6 @@
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Returns archive</div>
       <button class="back" onclick="goHome()">← Home</button>
     </div>
-    <div class="panel">
     <div class="field" style="margin-bottom:12px">
       <input type="text" id="arch-search" placeholder="Search by item, person, date…" style="font-size:13px"/>
     </div>
