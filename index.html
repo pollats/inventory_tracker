@@ -585,7 +585,7 @@ function calcAvailable(item, startDate, endDate, reservations, checkouts) {
 }
 
 // ── Image compression + base64 ────────────────────────────────────────────
-function compressImage(file, maxW = 300, quality = 0.30) {
+function compressImage(file, maxW = 500, quality = 0.50) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = e => {
