@@ -540,6 +540,138 @@
 </div>
 
 <!-- MANAGE ITEMS -->
+
+  <!-- Manage items: sub-menu -->
+  <div class="hidden" id="manage-items-card">
+    <div class="ch" style="margin-bottom:20px">
+      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Manage inventory</div>
+      <button class="back" onclick="goHome()">← Home</button>
+    </div>
+    <div class="submenu-stack">
+      <button class="submenu-row" onclick="goSection('mi-add')">
+        <div class="icon-badge blue sm">➕</div>
+        <div class="tile-text"><div class="tile-label">Add new item</div><div class="tile-desc">Add an item to your inventory</div></div>
+        <span class="tile-arrow">›</span>
+      </button>
+      <button class="submenu-row" onclick="goSection('mi-view')">
+        <div class="icon-badge gray sm">📋</div>
+        <div class="tile-text"><div class="tile-label">View existing items</div><div class="tile-desc">Edit or remove inventory items</div></div>
+        <span class="tile-arrow">›</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Manage items: add -->
+  <div class="card hidden" id="mi-add-card">
+    <div class="ch">
+      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Add new item</div>
+      <button class="back" onclick="goSection('manage-items')">← Back</button>
+    </div>
+    <div class="field">
+      <label for="mi-cat">Category <span class="req">*</span></label>
+      <input type="text" id="mi-cat" placeholder="e.g. Audio Visual" list="mi-cat-list" autocomplete="off"/>
+      <datalist id="mi-cat-list"></datalist>
+    </div>
+    <div class="field">
+      <label for="mi-name">Item name <span class="req">*</span></label>
+      <input type="text" id="mi-name" placeholder="e.g. Projector"/>
+    </div>
+    <div class="field">
+      <label for="mi-model">ID / Model number <span class="opt">(optional)</span></label>
+      <input type="text" id="mi-model" placeholder="e.g. PJ-2041"/>
+    </div>
+    <div class="field-row">
+      <div>
+        <label for="mi-total">Total units <span class="req">*</span></label>
+        <input type="text" id="mi-total" placeholder="e.g. 3"/>
+      </div>
+      <div>
+        <label for="mi-avail">Units available <span class="req">*</span></label>
+        <input type="text" id="mi-avail" placeholder="e.g. 3"/>
+      </div>
+    </div>
+    <button class="btn" id="mi-save-btn">Add item</button>
+    <div class="banner" id="mi-banner"></div>
+  </div>
+
+  <!-- Manage items: view / edit / remove -->
+  <div class="card hidden" id="mi-view-card">
+    <div class="ch">
+      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Existing items</div>
+      <button class="back" onclick="goSection('manage-items')">← Back</button>
+    </div>
+    <div class="field" style="margin-bottom:14px">
+      <input type="text" id="mi-search" placeholder="Search items…" style="font-size:13px"/>
+    </div>
+    <div id="mi-list"></div>
+  </div>
+
+  <!-- Edit item modal -->
+  <div class="overlay" id="mi-edit-overlay">
+    <div class="dialog" style="max-width:360px">
+      <div class="ch" style="margin-bottom:18px">
+        <h3 id="mi-edit-title" style="font-size:15px">Edit item</h3>
+        <button class="back" onclick="closeMiEdit()">✕</button>
+      </div>
+      <div class="field">
+        <label for="mi-edit-cat">Category <span class="req">*</span></label>
+        <input type="text" id="mi-edit-cat" list="mi-edit-cat-list"/>
+        <datalist id="mi-edit-cat-list"></datalist>
+      </div>
+      <div class="field">
+        <label for="mi-edit-name">Item name <span class="req">*</span></label>
+        <input type="text" id="mi-edit-name"/>
+      </div>
+      <div class="field">
+        <label for="mi-edit-model">ID / Model <span class="opt">(optional)</span></label>
+        <input type="text" id="mi-edit-model"/>
+      </div>
+      <div class="field-row">
+        <div>
+          <label for="mi-edit-total">Total units</label>
+          <input type="text" id="mi-edit-total"/>
+        </div>
+        <div>
+          <label for="mi-edit-avail">Available</label>
+          <input type="text" id="mi-edit-avail"/>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="mi-edit-save-btn">Save changes</button>
+        <button class="btn ghost" onclick="closeMiEdit()">Cancel</button>
+      </div>
+      <div class="banner" id="mi-edit-banner"></div>
+    </div>
+  </div>
+
+<!-- ARCHIVE -->
+  <div class="card hidden" id="archive-card">
+    <div class="ch">
+      <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Returns archive</div>
+      <button class="back" onclick="goHome()">← Home</button>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <input type="text" id="arch-search" placeholder="Search by item, person, date…" style="font-size:13px"/>
+    </div>
+    <div id="archive-body"><div class="skel" style="height:80px"></div></div>
+  </div>
+
+<!-- Photo viewer modal -->
+<div class="overlay" id="photo-viewer-overlay">
+  <div class="dialog" style="max-width:520px;padding:20px">
+    <div class="ch" style="margin-bottom:12px">
+      <div>
+        <div style="font-size:15px;font-weight:600" id="pv-title"></div>
+        <div style="font-size:12px;color:var(--muted)" id="pv-sub"></div>
+      </div>
+      <button class="back" onclick="closePhotoViewer()">✕ Close</button>
+    </div>
+    <img id="pv-img" src="" alt="Condition photo" style="max-width:100%;border-radius:8px;display:block"/>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px" id="pv-meta"></div>
+  </div>
+</div>
+
+<!-- MANAGE ITEMS -->
   <div class="card hidden" id="manage-items-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Manage items</div>
@@ -794,7 +926,7 @@ function compressImage(file, maxW = 500, quality = 0.50) {
 const cards = {
   'home':'home-card','res-menu':'res-menu-card','borrow-menu':'borrow-menu-card',
   'add-res':'add-res-card','view-res':'view-res-card','mod-res':'mod-res-card','del-res':'del-res-card',
-  'take':'take-card','return':'return-card','archive':'archive-card','manage-items':'manage-items-card'
+  'take':'take-card','return':'return-card','archive':'archive-card','manage-items':'manage-items-card','mi-add':'mi-add-card','mi-view':'mi-view-card'
 };
 
 function showOnly(key) {
@@ -813,6 +945,8 @@ function goSection(key) {
   if (key === 'return')   openReturn();
   if (key === 'archive')  openArchive();
   if (key === 'manage-items') openManageItems();
+  if (key === 'mi-add')    openMiAdd();
+  if (key === 'mi-view')   openMiView();
 }
 
 document.querySelectorAll('[data-go]').forEach(el => {
@@ -1206,99 +1340,24 @@ function show(id){$(id).classList.remove('hidden');}
 function hide(id){$(id).classList.add('hidden');}
 
 
-// ── MANAGE ITEMS ──────────────────────────────────────────────────────────
-let miEditIdx = null; // null = adding, number = editing index
+// ── MANAGE ITEMS ─────────────────────────────────────────────────────────
+let miEditIdx = null;
 
-async function openManageItems() {
+function openManageItems() {
   show('manage-items-card');
-  resetMiForm();
-  await refreshMiList();
 }
 
-async function refreshMiList() {
-  $('mi-list').innerHTML = '<div class="skel" style="height:60px;margin-bottom:8px"></div>';
-  try {
-    const items = await readCSV('items.csv');
-    // Populate category datalist for autocomplete
-    const cats = [...new Set(items.map(i => i['Category']))].sort();
-    $('mi-cat-list').innerHTML = cats.map(c => `<option value="${c}">`).join('');
-    renderMiList(items);
-  } catch {
-    $('mi-list').innerHTML = '<div class="empty">Could not load items.</div>';
-  }
-}
-
-function renderMiList(items) {
-  if (!items.length) { $('mi-list').innerHTML = '<div class="empty" style="margin-bottom:12px">No items yet. Add one below.</div>'; return; }
-  const grouped = {};
-  items.forEach((item, idx) => {
-    const cat = item['Category'] || 'Uncategorised';
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push({ item, idx });
-  });
-  let html = '';
-  Object.keys(grouped).sort().forEach(cat => {
-    html += `<div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px">${cat}</div>`;
-    grouped[cat].forEach(({ item, idx }) => {
-      const ua = parseInt(item['Units Available']) || 0;
-      const tot = parseInt(item['Total Units']) || 0;
-      html += `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;background:var(--surface);margin-bottom:6px">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:500;color:var(--text)">${item['Item Name']}${item['ID / Model Number']?` <span style="color:var(--muted);font-size:11px">(${item['ID / Model Number']})</span>`:''}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${ua} of ${tot} available</div>
-        </div>
-        <button onclick="startEditItem(${idx})" style="background:none;border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:12px;color:var(--accent);cursor:pointer;font-family:inherit;white-space:nowrap">Edit</button>
-        <button onclick="deleteItem(${idx})" style="background:none;border:1px solid #FECACA;border-radius:5px;padding:5px 10px;font-size:12px;color:var(--error);cursor:pointer;font-family:inherit;white-space:nowrap">Remove</button>
-      </div>`;
-    });
-  });
-  $('mi-list').innerHTML = html;
-}
-
-async function startEditItem(idx) {
-  const items = await readCSV('items.csv');
-  const item = items[idx];
-  if (!item) return;
-  miEditIdx = idx;
-  $('mi-cat').value = item['Category'] || '';
-  $('mi-name').value = item['Item Name'] || '';
-  $('mi-model').value = item['ID / Model Number'] || '';
-  $('mi-total').value = item['Total Units'] || '';
-  $('mi-avail').value = item['Units Available'] || '';
-  $('mi-form-title').textContent = `Editing: ${item['Item Name']}`;
-  $('mi-save-btn').textContent = 'Save changes';
-  $('mi-cancel-btn').style.display = '';
-  $('mi-form-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  hideBanner('mi-banner');
-}
-
-function resetMiForm() {
-  miEditIdx = null;
+// ── ADD ───────────────────────────────────────────────────────────────────
+async function openMiAdd() {
+  show('mi-add-card');
+  // Reset form
   $('mi-cat').value = ''; $('mi-name').value = ''; $('mi-model').value = '';
   $('mi-total').value = ''; $('mi-avail').value = '';
-  $('mi-form-title').textContent = 'Add new item';
-  $('mi-save-btn').textContent = 'Add item';
-  $('mi-cancel-btn').style.display = 'none';
   hideBanner('mi-banner');
-}
-
-async function deleteItem(idx) {
-  const items = await readCSV('items.csv');
-  const item = items[idx];
-  if (!item) return;
-  if (!confirm(`Remove "${item['Item Name']}" from inventory? This cannot be undone.`)) return;
-  items.splice(idx, 1);
-  $('mi-list').innerHTML = '<div class="skel" style="height:60px"></div>';
-  try {
-    await writeCSV('items.csv', ITM_HDR, items, getActive());
-    allItems = await readCSV('items.csv'); // refresh global
-    showBanner('mi-banner', 'success', 'Removed', `"${item['Item Name']}" has been removed.`);
-    await refreshMiList();
-  } catch(err) {
-    showBanner('mi-banner', 'error', 'Error', err.message || 'Could not remove item.');
-    await refreshMiList();
-  }
+  $('mi-save-btn').textContent = 'Add item';
+  // Populate category autocomplete
+  const cats = [...new Set(allItems.map(i => i['Category']))].sort();
+  $('mi-cat-list').innerHTML = cats.map(c => `<option value="${c}">`).join('');
 }
 
 $('mi-save-btn').addEventListener('click', async () => {
@@ -1308,40 +1367,146 @@ $('mi-save-btn').addEventListener('click', async () => {
   const total = parseInt($('mi-total').value.trim());
   const avail = parseInt($('mi-avail').value.trim());
 
-  if (!cat || !name) { showBanner('mi-banner', 'error', 'Required', 'Category and item name are required.'); return; }
-  if (isNaN(total) || total < 1) { showBanner('mi-banner', 'error', 'Invalid', 'Total units must be at least 1.'); return; }
-  if (isNaN(avail) || avail < 0) { showBanner('mi-banner', 'error', 'Invalid', 'Units available cannot be negative.'); return; }
-  if (avail > total) { showBanner('mi-banner', 'error', 'Invalid', 'Units available cannot exceed total units.'); return; }
+  if (!cat || !name) { showBanner('mi-banner','error','Required','Category and item name are required.'); return; }
+  if (isNaN(total) || total < 1) { showBanner('mi-banner','error','Invalid','Total units must be at least 1.'); return; }
+  if (isNaN(avail) || avail < 0) { showBanner('mi-banner','error','Invalid','Units available cannot be negative.'); return; }
+  if (avail > total) { showBanner('mi-banner','error','Invalid','Available cannot exceed total.'); return; }
 
-  setLoading('mi-save-btn', true, miEditIdx === null ? 'Add item' : 'Save changes');
+  setLoading('mi-save-btn', true, 'Add item');
   hideBanner('mi-banner');
-
   try {
     const items = await readCSV('items.csv');
-    const newItem = { 'Category': cat, 'Item Name': name, 'ID / Model Number': model, 'Total Units': total.toString(), 'Units Available': avail.toString() };
-
-    if (miEditIdx !== null) {
-      items[miEditIdx] = newItem;
-    } else {
-      // Check for duplicate name
-      if (items.find(i => i['Item Name'].toLowerCase() === name.toLowerCase())) {
-        showBanner('mi-banner', 'error', 'Duplicate', `An item named "${name}" already exists.`);
-        setLoading('mi-save-btn', false, 'Add item'); return;
-      }
-      items.push(newItem);
+    if (items.find(i => i['Item Name'].toLowerCase() === name.toLowerCase())) {
+      showBanner('mi-banner','error','Duplicate',`"${name}" already exists.`);
+      setLoading('mi-save-btn', false, 'Add item'); return;
     }
-
+    items.push({'Category':cat,'Item Name':name,'ID / Model Number':model,'Total Units':total.toString(),'Units Available':avail.toString()});
     await writeCSV('items.csv', ITM_HDR, items, getActive());
-    allItems = await readCSV('items.csv'); // refresh global
-    const action = miEditIdx !== null ? 'updated' : 'added';
-    showBanner('mi-banner', 'success', miEditIdx !== null ? 'Updated' : 'Added', `"${name}" has been ${action}.`);
-    resetMiForm();
-    await refreshMiList();
-  } catch(err) {
-    showBanner('mi-banner', 'error', 'Error', err.message || 'Could not save.');
-  }
-  setLoading('mi-save-btn', false, miEditIdx === null ? 'Add item' : 'Save changes');
+    allItems = await readCSV('items.csv');
+    showBanner('mi-banner','success','Added',`"${name}" has been added.`);
+    $('mi-cat').value = ''; $('mi-name').value = ''; $('mi-model').value = '';
+    $('mi-total').value = ''; $('mi-avail').value = '';
+  } catch(err) { showBanner('mi-banner','error','Error', err.message || 'Could not save.'); }
+  setLoading('mi-save-btn', false, 'Add item');
 });
+
+// ── VIEW ──────────────────────────────────────────────────────────────────
+async function openMiView() {
+  show('mi-view-card');
+  $('mi-search').value = '';
+  $('mi-list').innerHTML = '<div class="skel" style="height:60px;margin-bottom:8px"></div><div class="skel" style="height:60px"></div>';
+  const items = await readCSV('items.csv');
+  allItems = items;
+  renderMiList(items);
+}
+
+function renderMiList(items) {
+  if (!items.length) { $('mi-list').innerHTML = '<div class="empty">No items found.</div>'; return; }
+
+  const grouped = {};
+  items.forEach((item, idx) => {
+    const cat = item['Category'] || 'Uncategorised';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push({ item, idx: allItems.indexOf(item) });
+  });
+
+  let html = '';
+  Object.keys(grouped).sort().forEach(cat => {
+    html += `<div style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin:16px 0 8px;padding-left:2px">${cat}</div>`;
+    html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:4px">`;
+    grouped[cat].forEach(({ item, idx }, i, arr) => {
+      const ua = parseInt(item['Units Available']) || 0;
+      const tot = parseInt(item['Total Units']) || 1;
+      const isLast = i === arr.length - 1;
+      html += `
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;${!isLast?'border-bottom:1px solid var(--border-soft)':''}">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            ${item['Item Name']}${item['ID / Model Number']?` <span style="color:var(--text-3);font-size:11px;font-weight:400">${item['ID / Model Number']}</span>`:''}
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:1px">${ua} / ${tot} available</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button onclick="openMiEdit(${idx})" style="padding:5px 12px;font-size:12px;font-weight:500;color:var(--accent);background:var(--accent-bg, #EFF6FF);border:none;border-radius:6px;cursor:pointer;font-family:inherit;transition:background .14s" onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#EFF6FF'">Edit</button>
+          <button onclick="confirmDeleteItem(${idx},'${item['Item Name'].replace(/'/g,"\'")}');" style="padding:5px 12px;font-size:12px;font-weight:500;color:var(--error);background:#FEF2F2;border:none;border-radius:6px;cursor:pointer;font-family:inherit;transition:background .14s" onmouseover="this.style.background='#FECACA'" onmouseout="this.style.background='#FEF2F2'">Remove</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  $('mi-list').innerHTML = html;
+}
+
+$('mi-search').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  const filtered = q ? allItems.filter(i =>
+    (i['Item Name']||'').toLowerCase().includes(q) ||
+    (i['Category']||'').toLowerCase().includes(q) ||
+    (i['ID / Model Number']||'').toLowerCase().includes(q)
+  ) : allItems;
+  renderMiList(filtered);
+});
+
+// ── EDIT MODAL ────────────────────────────────────────────────────────────
+async function openMiEdit(idx) {
+  const items = await readCSV('items.csv');
+  const item = items[idx];
+  if (!item) return;
+  miEditIdx = idx;
+  $('mi-edit-title').textContent = item['Item Name'];
+  $('mi-edit-cat').value   = item['Category'] || '';
+  $('mi-edit-name').value  = item['Item Name'] || '';
+  $('mi-edit-model').value = item['ID / Model Number'] || '';
+  $('mi-edit-total').value = item['Total Units'] || '';
+  $('mi-edit-avail').value = item['Units Available'] || '';
+  // Populate cat datalist
+  const cats = [...new Set(allItems.map(i => i['Category']))].sort();
+  $('mi-edit-cat-list').innerHTML = cats.map(c => `<option value="${c}">`).join('');
+  hideBanner('mi-edit-banner');
+  $('mi-edit-overlay').classList.add('show');
+  setTimeout(() => $('mi-edit-name').focus(), 80);
+}
+
+function closeMiEdit() {
+  $('mi-edit-overlay').classList.remove('show');
+  miEditIdx = null;
+}
+
+$('mi-edit-save-btn').addEventListener('click', async () => {
+  const cat   = $('mi-edit-cat').value.trim();
+  const name  = $('mi-edit-name').value.trim();
+  const model = $('mi-edit-model').value.trim();
+  const total = parseInt($('mi-edit-total').value.trim());
+  const avail = parseInt($('mi-edit-avail').value.trim());
+
+  if (!cat || !name) { showBanner('mi-edit-banner','error','Required','Category and item name are required.'); return; }
+  if (isNaN(total) || total < 1) { showBanner('mi-edit-banner','error','Invalid','Total must be at least 1.'); return; }
+  if (isNaN(avail) || avail < 0) { showBanner('mi-edit-banner','error','Invalid','Available cannot be negative.'); return; }
+  if (avail > total) { showBanner('mi-edit-banner','error','Invalid','Available cannot exceed total.'); return; }
+
+  setLoading('mi-edit-save-btn', true, 'Save changes');
+  hideBanner('mi-edit-banner');
+  try {
+    const items = await readCSV('items.csv');
+    items[miEditIdx] = {'Category':cat,'Item Name':name,'ID / Model Number':model,'Total Units':total.toString(),'Units Available':avail.toString()};
+    await writeCSV('items.csv', ITM_HDR, items, getActive());
+    allItems = await readCSV('items.csv');
+    closeMiEdit();
+    renderMiList(allItems);
+  } catch(err) { showBanner('mi-edit-banner','error','Error', err.message || 'Could not save.'); }
+  setLoading('mi-edit-save-btn', false, 'Save changes');
+});
+
+async function confirmDeleteItem(idx, name) {
+  if (!confirm(`Remove "${name}" from inventory? This cannot be undone.`)) return;
+  try {
+    const items = await readCSV('items.csv');
+    items.splice(idx, 1);
+    await writeCSV('items.csv', ITM_HDR, items, getActive());
+    allItems = await readCSV('items.csv');
+    renderMiList(allItems);
+  } catch(err) { alert('Could not remove item: ' + (err.message||'unknown error')); }
+}
 
 // ── ARCHIVE ───────────────────────────────────────────────────────────────
 let archiveData = [];
