@@ -198,6 +198,16 @@
     .photo-drop .ph-label strong { color: var(--accent); font-weight: 500; }
     .photo-preview { max-width: 100%; max-height: 160px; border-radius: 6px; margin-top: 10px; display: none; }
 
+    /* Content panel — replaces card for form pages */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--sh);
+      padding: 22px 20px;
+      margin-bottom: 12px;
+    }
+
     /* Legacy compat */
     .tile-text { flex: 1; min-width: 0; }
     .tile-label { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
@@ -317,8 +327,8 @@
   </div>
 
   <!-- Reservations sub-menu -->
-  <div class="card hidden" id="res-menu-card">
-    <div class="ch" style="margin-bottom:20px">
+  <div class="hidden" id="res-menu-card">
+    <div class="ch" style="margin-bottom:20px;padding-top:4px">
       <div>
         <div style="font-size:18px;font-weight:700;color:var(--text)">Reservations</div>
       </div>
@@ -349,8 +359,8 @@
   </div>
 
   <!-- Borrow/Return sub-menu -->
-  <div class="card hidden" id="borrow-menu-card">
-    <div class="ch" style="margin-bottom:20px">
+  <div class="hidden" id="borrow-menu-card">
+    <div class="ch" style="margin-bottom:20px;padding-top:4px">
       <div>
         <div style="font-size:18px;font-weight:700;color:var(--text)">Borrow / Return</div>
       </div>
@@ -371,7 +381,7 @@
   </div>
 
   <!-- ADD RESERVATION -->
-  <div class="card hidden" id="add-res-card">
+  <div class="hidden" id="add-res-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">New reservation</div>
       <button class="back" onclick="goSection('res-menu')">← Back</button>
@@ -405,23 +415,25 @@
       <button type="submit" class="btn" id="r-submit" disabled>Reserve item</button>
       <div class="banner" id="r-banner"></div>
     </form>
+    </div>
   </div>
 
   <!-- VIEW RESERVATIONS -->
-  <div class="card hidden" id="view-res-card">
+  <div class="hidden" id="view-res-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">All reservations</div>
       <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
-    <div id="view-res-body"></div>
+    <div class="panel" style="padding:0;overflow:hidden"><div id="view-res-body"></div></div>
   </div>
 
   <!-- MODIFY RESERVATION -->
-  <div class="card hidden" id="mod-res-card">
+  <div class="hidden" id="mod-res-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Modify reservation</div>
       <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
+    <div class="panel">
     <div class="field">
       <label for="mod-sel">Select reservation</label>
       <div class="select-wrap"><select id="mod-sel"><option value="">Choose…</option></select></div>
@@ -436,14 +448,16 @@
       <button class="btn" id="mod-btn">Save changes</button>
       <div class="banner" id="mod-banner"></div>
     </div>
+    </div>
   </div>
 
   <!-- DELETE RESERVATION -->
-  <div class="card hidden" id="del-res-card">
+  <div class="hidden" id="del-res-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Delete reservation</div>
       <button class="back" onclick="goSection('res-menu')">← Back</button>
     </div>
+    <div class="panel">
     <div class="field">
       <label for="del-sel">Select reservation</label>
       <div class="select-wrap"><select id="del-sel"><option value="">Choose…</option></select></div>
@@ -456,15 +470,17 @@
       </div>
       <div class="banner" id="del-banner"></div>
     </div>
+    </div>
   </div>
 
   <!-- TAKE AN ITEM -->
-  <div class="card hidden" id="take-card">
+  <div class="hidden" id="take-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Take an item</div>
       <button class="back" onclick="goSection('borrow-menu')">← Back</button>
     </div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Select your active reservation below. The item will be marked as taken.</p>
+    <div class="panel">
+    <div class="field">"font-size:13px;color:var(--muted);margin-bottom:18px">Select your active reservation below. The item will be marked as taken.</p>
     <div class="field">
       <label for="take-sel">Your reservation <span class="req">*</span></label>
       <div class="select-wrap"><select id="take-sel"><option value="">Loading…</option></select></div>
@@ -474,14 +490,16 @@
       <button class="btn" id="take-btn" style="margin-top:12px">Confirm — I'm taking this item</button>
       <div class="banner" id="take-banner"></div>
     </div>
+    </div>
   </div>
 
   <!-- RETURN AN ITEM -->
-  <div class="card hidden" id="return-card">
+  <div class="hidden" id="return-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Return an item</div>
       <button class="back" onclick="goSection('borrow-menu')">← Back</button>
     </div>
+    <div class="panel">
     <div class="field">
       <label for="ret-sel">Select item being returned <span class="req">*</span></label>
       <div class="select-wrap"><select id="ret-sel"><option value="">Loading…</option></select></div>
@@ -509,15 +527,17 @@
       <button class="btn" id="ret-btn">Confirm return</button>
       <div class="banner" id="ret-banner"></div>
     </div>
+    </div>
   </div>
 </div>
 
 <!-- ARCHIVE -->
-  <div class="card hidden" id="archive-card">
+  <div class="hidden" id="archive-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Returns archive</div>
       <button class="back" onclick="goHome()">← Home</button>
     </div>
+    <div class="panel">
     <div class="field" style="margin-bottom:12px">
       <input type="text" id="arch-search" placeholder="Search by item, person, date…" style="font-size:13px"/>
     </div>
@@ -542,8 +562,8 @@
 <!-- MANAGE ITEMS -->
 
   <!-- Manage items: sub-menu -->
-  <div class="card hidden" id="manage-items-card">
-    <div class="ch" style="margin-bottom:20px">
+  <div class="hidden" id="manage-items-card">
+    <div class="ch" style="margin-bottom:20px;padding-top:4px">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Manage inventory</div>
       <button class="back" onclick="goHome()">← Home</button>
     </div>
@@ -562,11 +582,12 @@
   </div>
 
   <!-- Manage items: add -->
-  <div class="card hidden" id="mi-add-card">
+  <div class="hidden" id="mi-add-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Add new item</div>
       <button class="back" onclick="goSection('manage-items')">← Back</button>
     </div>
+    <div class="panel">
     <div class="field">
       <label for="mi-cat">Category <span class="req">*</span></label>
       <input type="text" id="mi-cat" placeholder="e.g. Audio Visual" list="mi-cat-list" autocomplete="off"/>
@@ -592,18 +613,21 @@
     </div>
     <button class="btn" id="mi-save-btn">Add item</button>
     <div class="banner" id="mi-banner"></div>
+    </div>
   </div>
 
   <!-- Manage items: view / edit / remove -->
-  <div class="card hidden" id="mi-view-card">
+  <div class="hidden" id="mi-view-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Existing items</div>
       <button class="back" onclick="goSection('manage-items')">← Back</button>
     </div>
+    <div class="panel">
     <div class="field" style="margin-bottom:14px">
       <input type="text" id="mi-search" placeholder="Search items…" style="font-size:13px"/>
     </div>
     <div id="mi-list"></div>
+    </div>
   </div>
 
   <!-- Edit item modal -->
@@ -645,11 +669,12 @@
   </div>
 
 <!-- ARCHIVE -->
-  <div class="card hidden" id="archive-card">
+  <div class="hidden" id="archive-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Returns archive</div>
       <button class="back" onclick="goHome()">← Home</button>
     </div>
+    <div class="panel">
     <div class="field" style="margin-bottom:12px">
       <input type="text" id="arch-search" placeholder="Search by item, person, date…" style="font-size:13px"/>
     </div>
@@ -672,7 +697,7 @@
 </div>
 
 <!-- MANAGE ITEMS -->
-  <div class="card hidden" id="manage-items-card">
+  <div class="hidden" id="manage-items-card">
     <div class="ch">
       <div style="font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px">Manage items</div>
       <button class="back" onclick="goHome()">← Home</button>
